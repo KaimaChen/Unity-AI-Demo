@@ -13,6 +13,7 @@ public class BaseMap : MonoBehaviour
     public Vector2 start;
     public Vector2 end;
     public float time = 0.01f;
+    public bool isConsiderTerrain = false;
 
     protected Dictionary<Vector2, Node> mPos2Node = new Dictionary<Vector2, Node>();
 
@@ -39,7 +40,7 @@ public class BaseMap : MonoBehaviour
 
                 Node node = go.GetComponent<Node>();
                 NodeType type = (NodeType)Enum.Parse(typeof(NodeType), value.ToString());
-                node.Set(type, row, col, this);
+                node.Set(type, row, col, this, isConsiderTerrain);
                 mPos2Node.Add(pos, node);
 
                 if (value == 4)

@@ -32,11 +32,12 @@ public class Node : MonoBehaviour {
         SetType(mType);
     }
 
-    public void Set(NodeType type, int r, int c, BaseMap map)
+    public void Set(NodeType type, int r, int c, BaseMap map, bool considerTerrain = false)
     {
         SetType(type);
         mPos = new Vector2(c, r);
         mMap = map;
+        mConsiderTerrain = considerTerrain;
     }
 
     public void SetParent(Node p)
