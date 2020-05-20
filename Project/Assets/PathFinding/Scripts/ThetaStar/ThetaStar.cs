@@ -97,7 +97,7 @@ public class ThetaStar : AStar
                 }
             }
         }
-        Debug.LogError(start + ", " + end);
+
         return true;
     }
 }
