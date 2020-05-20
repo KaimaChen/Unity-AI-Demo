@@ -10,12 +10,12 @@ public class BaseMap : MonoBehaviour
 
     public GameObject nodePrefab;
     public int[,] map;
-    public Vector2 start;
-    public Vector2 end;
+    public Vector2Int start;
+    public Vector2Int end;
     public float time = 0.01f;
     public bool isConsiderTerrain = false;
 
-    protected Dictionary<Vector2, Node> mPos2Node = new Dictionary<Vector2, Node>();
+    protected Dictionary<Vector2Int, Node> mPos2Node = new Dictionary<Vector2Int, Node>();
 
     void Start()
     {
@@ -33,10 +33,13 @@ public class BaseMap : MonoBehaviour
             for (int col = 0; col < COL; col++)
             {
                 int value = map[row, col];
-                Vector2 pos = new Vector2(col, row);
+                Vector2Int pos = new Vector2Int(col, row);
                 GameObject go = Instantiate(nodePrefab) as GameObject;
                 go.transform.SetParent(transform);
-                go.transform.localPosition = pos;
+
+                float x = pos.x;
+                float y = ROW - pos.y;
+                go.transform.localPosition = new Vector3(x, y, 0);
 
                 Node node = go.GetComponent<Node>();
                 NodeType type = (NodeType)Enum.Parse(typeof(NodeType), value.ToString());
@@ -94,32 +97,32 @@ public class BaseMap : MonoBehaviour
     /// <summary>
     /// 获取pos的附近点（支持斜角的）
     /// </summary>
-    protected List<Vector2> GetNeighbors(Vector2 pos)
+    protected List<Vector2Int> GetNeighbors(Vector2Int pos)
     {
-        List<Vector2> neighbors = new List<Vector2>();
+        List<Vector2Int> neighbors = new List<Vector2Int>();
         if (pos.y - 1 >= 0)
         {
-            neighbors.Add(new Vector2(pos.x, pos.y - 1));
+            neighbors.Add(new Vector2Int(pos.x, pos.y - 1));
             if (pos.x - 1 >= 0)
-                neighbors.Add(new Vector2(pos.x - 1, pos.y - 1));
+                neighbors.Add(new Vector2Int(pos.x - 1, pos.y - 1));
             if (pos.x + 1 < COL)
-                neighbors.Add(new Vector2(pos.x + 1, pos.y - 1));
+                neighbors.Add(new Vector2Int(pos.x + 1, pos.y - 1));
         }
 
         if (pos.y + 1 < ROW)
         {
-            neighbors.Add(new Vector2(pos.x, pos.y + 1));
+            neighbors.Add(new Vector2Int(pos.x, pos.y + 1));
             if (pos.x - 1 >= 0)
-                neighbors.Add(new Vector2(pos.x - 1, pos.y + 1));
+                neighbors.Add(new Vector2Int(pos.x - 1, pos.y + 1));
             if (pos.x + 1 < COL)
-                neighbors.Add(new Vector2(pos.x + 1, pos.y + 1));
+                neighbors.Add(new Vector2Int(pos.x + 1, pos.y + 1));
         }
 
         {
             if (pos.x - 1 >= 0)
-                neighbors.Add(new Vector2(pos.x - 1, pos.y));
+                neighbors.Add(new Vector2Int(pos.x - 1, pos.y));
             if (pos.x + 1 < COL)
-                neighbors.Add(new Vector2(pos.x + 1, pos.y));
+                neighbors.Add(new Vector2Int(pos.x + 1, pos.y));
         }
 
         return neighbors;

@@ -21,11 +21,18 @@ public enum NodeType
 public class Node : MonoBehaviour {
     public Node parent = null;
 
-    Vector2 mPos; //在地图上的列与行
+    Vector2Int mPos; //在地图上的列与行
     NodeType mType = NodeType.Ground;
     MeshRenderer mRenderer;
     BaseMap mMap;
     bool mConsiderTerrain = false; //是否考虑地形花费
+
+    #region get-set
+    public Vector2Int Pos
+    {
+        get { return mPos; }
+    }
+    #endregion
 
     private void Start()
     {
@@ -35,7 +42,7 @@ public class Node : MonoBehaviour {
     public void Set(NodeType type, int r, int c, BaseMap map, bool considerTerrain = false)
     {
         SetType(type);
-        mPos = new Vector2(c, r);
+        mPos = new Vector2Int(c, r);
         mMap = map;
         mConsiderTerrain = considerTerrain;
     }
@@ -79,6 +86,9 @@ public class Node : MonoBehaviour {
     /// <returns></returns>
     public float GetCostFromStart(Node p)
     {
+        if (mPos == mMap.start)
+            return 0;
+
         if (p == null)
             p = parent;
 

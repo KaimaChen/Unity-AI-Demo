@@ -7,8 +7,8 @@ using UnityEngine;
 /// 只考虑最接近起点的
 /// </summary>
 public class DijkstraSearch : BaseMap {
-    List<Vector2> mOpenList = new List<Vector2>();
-    List<Vector2> mCloseList = new List<Vector2>();
+    List<Vector2Int> mOpenList = new List<Vector2Int>();
+    List<Vector2Int> mCloseList = new List<Vector2Int>();
 
     protected override void InitMap()
     {
@@ -33,7 +33,7 @@ public class DijkstraSearch : BaseMap {
         mOpenList.Add(start);
         while (mOpenList.Count > 0)
         {
-            Vector2 cur = FindMinFromStartInOpenList();
+            Vector2Int cur = FindMinFromStartInOpenList();
 
             if (cur == end) //找到终点
             {
@@ -46,10 +46,10 @@ public class DijkstraSearch : BaseMap {
                     mPos2Node[cur].SetType(NodeType.Searched);
 
                 mCloseList.Add(cur);
-                List<Vector2> neighbors = GetNeighbors(cur);
+                List<Vector2Int> neighbors = GetNeighbors(cur);
                 for (int i = 0; i < neighbors.Count; i++)
                 {
-                    Vector2 p = neighbors[i];
+                    Vector2Int p = neighbors[i];
                     if (!mCloseList.Contains(p) && map[(int)p.y, (int)p.x] != 0)
                     {
                         if (!mOpenList.Contains(p))
@@ -82,7 +82,7 @@ public class DijkstraSearch : BaseMap {
     /// <summary>
     /// 在open list中找到起点成本最低的节点并去掉
     /// </summary>
-    Vector2 FindMinFromStartInOpenList()
+    Vector2Int FindMinFromStartInOpenList()
     {
         float min = mPos2Node[mOpenList[0]].GetCostFromStart(null);
         int minIndex = 0;
@@ -96,7 +96,7 @@ public class DijkstraSearch : BaseMap {
             }
         }
 
-        Vector2 result = mOpenList[minIndex];
+        Vector2Int result = mOpenList[minIndex];
         mOpenList.RemoveAt(minIndex);
 
         return result;

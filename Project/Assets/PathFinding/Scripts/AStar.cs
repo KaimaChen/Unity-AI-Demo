@@ -6,17 +6,17 @@ using UnityEngine;
 /// <summary>
 /// A*寻路
 /// </summary>
-public class AStart : BaseMap
+public class AStar : BaseMap
 {
-    List<Vector2> mOpenList = new List<Vector2>();
-    List<Vector2> mCloseList = new List<Vector2>();
+    protected readonly List<Vector2Int> mOpenList = new List<Vector2Int>();
+    protected readonly List<Vector2Int> mCloseList = new List<Vector2Int>();
     
     protected override IEnumerator Process()
     {
         mOpenList.Add(start);
         while(mOpenList.Count > 0)
         {
-            Vector2 cur = FindMinInOpenList();
+            Vector2Int cur = FindMinInOpenList();
             
             if (cur == end) //找到终点
             {
@@ -29,23 +29,13 @@ public class AStart : BaseMap
                     mPos2Node[cur].SetType(NodeType.Searched);
 
                 mCloseList.Add(cur);
-                List<Vector2> neighbors = GetNeighbors(cur);
+                List<Vector2Int> neighbors = GetNeighbors(cur);
                 for (int i = 0; i < neighbors.Count; i++)
                 {
-                    Vector2 p = neighbors[i];
-                    if (!mCloseList.Contains(p) && map[(int)p.y, (int)p.x] != 0)
+                    Vector2Int p = neighbors[i];
+                    if (!mCloseList.Contains(p) && map[p.y, p.x] != 0)
                     {
-                        if(!mOpenList.Contains(p))
-                        {
-                            mPos2Node[p].SetParent(mPos2Node[cur]);
-                            mOpenList.Add(p);
-                        }
-                        else //如果已经在OpenList中，则看看以cur为父节点是否能缩短路径
-                        {
-                            Node node = mPos2Node[p];
-                            if (node.GetCostFromStart(null) > node.GetCostFromStart(mPos2Node[cur]))
-                                node.SetParent(mPos2Node[cur]);
-                        }
+                        UpdateVertex(cur, p);
                     }
                 }
             }
@@ -62,10 +52,23 @@ public class AStart : BaseMap
         yield break;
     }
 
+    protected virtual void UpdateVertex(Vector2Int curt, Vector2Int neighbor)
+    {
+        Node node = mPos2Node[neighbor];
+        bool isOpen = mOpenList.Contains(neighbor);
+        float gOld = isOpen ? node.GetCostFromStart(null) : float.MaxValue;
+
+        if (gOld > node.GetCostFromStart(mPos2Node[curt]))
+            node.SetParent(mPos2Node[curt]);
+
+        if (!isOpen)
+            mOpenList.Add(neighbor);
+    }
+
     /// <summary>
     /// 在open list中找成本最低的节点并去掉
     /// </summary>
-    Vector2 FindMinInOpenList()
+    Vector2Int FindMinInOpenList()
     {
         float min = mPos2Node[mOpenList[0]].GetTotalCost();
         int minIndex = 0;
@@ -79,7 +82,7 @@ public class AStart : BaseMap
             }
         }
 
-        Vector2 result = mOpenList[minIndex];
+        Vector2Int result = mOpenList[minIndex];
         mOpenList.RemoveAt(minIndex);
 
         return result;

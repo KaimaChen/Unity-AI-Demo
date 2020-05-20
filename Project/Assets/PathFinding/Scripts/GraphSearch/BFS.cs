@@ -8,15 +8,15 @@ using UnityEngine;
 /// </summary>
 public class BFS : BaseMap
 {
-    Queue<Vector2> mOpenList = new Queue<Vector2>();
-    List<Vector2> mCloseList = new List<Vector2>();
+    Queue<Vector2Int> mOpenList = new Queue<Vector2Int>();
+    List<Vector2Int> mCloseList = new List<Vector2Int>();
 
     protected override IEnumerator Process()
     {
         mOpenList.Enqueue(start);
         while (mOpenList.Count > 0)
         {
-            Vector2 cur = mOpenList.Dequeue();
+            Vector2Int cur = mOpenList.Dequeue();
 
             if (cur == end) //找到终点
             {
@@ -29,10 +29,10 @@ public class BFS : BaseMap
                     mPos2Node[cur].SetType(NodeType.Searched);
 
                 mCloseList.Add(cur);
-                List<Vector2> neighbors = GetNeighbors(cur);
+                List<Vector2Int> neighbors = GetNeighbors(cur);
                 for (int i = 0; i < neighbors.Count; i++)
                 {
-                    Vector2 p = neighbors[i];
+                    Vector2Int p = neighbors[i];
                     if (!mCloseList.Contains(p) && map[(int)p.y, (int)p.x] != 0)
                     {
                         if (!mOpenList.Contains(p))
