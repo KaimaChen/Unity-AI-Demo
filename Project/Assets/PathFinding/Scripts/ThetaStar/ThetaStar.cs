@@ -22,29 +22,29 @@ public class ThetaStar : AStar
         };
     }
 
-    protected override void UpdateVertex(Vector2Int curt, Vector2Int neighbor)
+    protected override void UpdateVertex(Vector2Int curtPos, Vector2Int neighborPos)
     {
-        bool isOpen = mOpenList.Contains(neighbor);
-        Node curtNode = mPos2Node[curt];
-        Node node = mPos2Node[neighbor];
+        bool isOpen = mOpenList.Contains(neighborPos);
+        Node curt = mPos2Node[curtPos];
+        Node neighbor = mPos2Node[neighborPos];
 
-        if (curtNode.parent != null && LineOfSign(curtNode.parent.Pos, neighbor))
+        if (curt.parent != null && LineOfSign(curt.parent.Pos, neighborPos))
         {
-            if (!isOpen || node.GetCostFromStart(null) > node.GetCostFromStart(curtNode.parent))
-                node.SetParent(curtNode.parent);
+            if (!isOpen || neighbor.GetCostFromStart(null) > neighbor.GetCostFromStart(curt.parent))
+                neighbor.SetParent(curt.parent);
         }
         else
         {
-            if (!isOpen || node.GetCostFromStart(null) > node.GetCostFromStart(mPos2Node[curt]))
-                node.SetParent(mPos2Node[curt]);
+            if (!isOpen || neighbor.GetCostFromStart(null) > neighbor.GetCostFromStart(mPos2Node[curtPos]))
+                neighbor.SetParent(curt);
         }
 
         if (!isOpen)
-            mOpenList.Add(neighbor);
+            mOpenList.Add(neighborPos);
     }
 
     private bool LineOfSign(Vector2Int start, Vector2Int end)
-    {
+    {   
         int dx = end.x - start.x;
         int dy = end.y - start.y;
         int ux = dx > 0 ? 1 : -1;
@@ -58,51 +58,46 @@ public class ThetaStar : AStar
         {
             for(x = start.x; x != end.x; x += ux)
             {
+                if (map[y, x] == 0)
+                    return false;
+
                 eps += dy;
                 if((eps << 1) >= dx)
                 {
-                    if(x != start.x)//处理斜线移动的可移动性判断
+                    if(x != start.x) //处理斜线移动的可移动性判断
                     {
-                        if (map[y, x] == 0)
-                            return false;
-
-                        if (map[y + uy, x - ux] == 0)
+                        //如果附近两个都是障碍，那么不可以走
+                        if (map[y, x + ux] == 0 && map[y + uy, x - ux] == 0)
                             return false;
                     }
 
                     y += uy;
                     eps -= dx;
                 }
-
-                if (map[y, x] == 0)
-                    return false;
             }
         }
         else
         {
             for(y = start.y; y != end.y; y += uy)
             {
+                if (map[y, x] == 0)
+                    return false;
+
                 eps += dx;
                 if((eps << 1) >= dy)
                 {
                     if(y != start.y)
                     {
-                        if (map[y, x] == 0)
-                            return false;
-
-                        if (map[y - uy, x + ux] == 0)
+                        if (map[y + uy, x] == 0 && map[y - uy, x + ux] == 0)
                             return false;
                     }
 
                     x += ux;
                     eps -= dy;
                 }
-
-                if (map[y, x] == 0)
-                    return false;
             }
         }
-
+        Debug.LogError(start + ", " + end);
         return true;
     }
 }

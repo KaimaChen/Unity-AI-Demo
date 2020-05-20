@@ -52,17 +52,17 @@ public class AStar : BaseMap
         yield break;
     }
 
-    protected virtual void UpdateVertex(Vector2Int curt, Vector2Int neighbor)
+    protected virtual void UpdateVertex(Vector2Int curtPos, Vector2Int neighborPos)
     {
-        Node node = mPos2Node[neighbor];
-        bool isOpen = mOpenList.Contains(neighbor);
-        float gOld = isOpen ? node.GetCostFromStart(null) : float.MaxValue;
+        Node neighbor = mPos2Node[neighborPos];
+        bool isOpen = mOpenList.Contains(neighborPos);
+        float gOld = isOpen ? neighbor.GetCostFromStart(null) : float.MaxValue;
 
-        if (gOld > node.GetCostFromStart(mPos2Node[curt]))
-            node.SetParent(mPos2Node[curt]);
+        if (gOld > neighbor.GetCostFromStart(mPos2Node[curtPos]))
+            neighbor.SetParent(mPos2Node[curtPos]);
 
         if (!isOpen)
-            mOpenList.Add(neighbor);
+            mOpenList.Add(neighborPos);
     }
 
     /// <summary>
