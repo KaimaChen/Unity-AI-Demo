@@ -150,9 +150,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 184f7313c0f173340b2b3bd8acb9323f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_showType: 3
-  m_nodePrafab: {fileID: 5508808133139747875, guid: ce25f8c03fe8a854bb2c5ffeca26c0b9,
+  m_nodePrefab: {fileID: 5508808133139747875, guid: ce25f8c03fe8a854bb2c5ffeca26c0b9,
     type: 3}
+  m_showType: 3
+  m_targetPos: {x: 6, y: 2}
 --- !u!4 &318425800
 Transform:
   m_ObjectHideFlags: 0

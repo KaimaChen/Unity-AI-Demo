@@ -24,7 +24,7 @@ public class BaseNode : MonoBehaviour
             Debug.LogError("请在Node的预设上绑定Collider");
     }
 
-    protected void Init(int x, int y, byte cost)
+    public virtual void Init(int x, int y, byte cost)
     {
         m_x = x;
         m_y = y;
@@ -33,6 +33,6 @@ public class BaseNode : MonoBehaviour
 
     public bool IsObstacle()
     {
-        return m_cost == BaseGrid.c_costObstacle;
+        return m_cost == Define.c_costObstacle;
     }
 }

@@ -35,12 +35,11 @@ public class FlowFieldNode : BaseNode
 	}
     #endregion
 
-    public void Init(int x, int y, byte cost, Transform parent)
+    public override void Init(int x, int y, byte cost)
 	{
 		base.Init(x, y, cost);
 
 		gameObject.SetActive(true);
-		transform.SetParent(parent);
 
 		float widthGap = 1.1f;
 		transform.position = new Vector3(x * widthGap, y * widthGap, 0);
@@ -120,7 +119,7 @@ public class FlowFieldNode : BaseNode
 	{
 		switch (cost)
 		{
-			case BaseGrid.c_costObstacle:
+			case Define.c_costObstacle:
 				return Color.black;
 			default:
 				return Color.white;

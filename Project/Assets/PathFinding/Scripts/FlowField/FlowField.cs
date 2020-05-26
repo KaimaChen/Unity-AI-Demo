@@ -7,35 +7,13 @@ using UnityEngine;
 //2.根据Cost field生成Integration field
 //3.根据Integration field生成Flow field
 
-public class FlowField : BaseGrid
+public class FlowField : BaseGrid<FlowFieldNode>
 {
 	private const int c_stateOpen = 1;
 	private const int c_stateClose = 2;
 
 	public FlowFieldShowType m_showType = FlowFieldShowType.All;
-	public GameObject m_nodePrafab;
-
-	FlowFieldNode[,] m_nodes;
-
-	protected override void Awake()
-	{
-		base.Awake();
-
-		byte[,] map = InitMap();
-
-		m_nodes = new FlowFieldNode[m_row, m_col];
-		for(int y = 0; y < m_row; y++)
-		{
-			for(int x = 0; x < m_col; x++)
-			{
-				byte cost = map[y, x];
-				m_nodes[y, x] = GameObject.Instantiate(m_nodePrafab).GetComponent<FlowFieldNode>();
-				m_nodes[y, x].Init(x, y, cost, transform);
-			}
-		}
-
-		Generate();
-	}
+	public Vector2Int m_targetPos;
 
 	protected override bool AddObstacle()
 	{
@@ -55,9 +33,12 @@ public class FlowField : BaseGrid
 		return result;
 	}
 
-	void Generate()
+	protected override void Generate()
 	{
-		GenerateIntegrationField(6, 2);
+		int tx = Mathf.Clamp(m_targetPos.x, 0, m_col - 1);
+		int ty = Mathf.Clamp(m_targetPos.y, 0, m_row - 1);
+
+		GenerateIntegrationField(tx, ty);
 		GenerateFlowField();
 
 		TraverseAllNode((FlowFieldNode n) => n.Show(m_showType));
@@ -67,7 +48,7 @@ public class FlowField : BaseGrid
 	{
 		for(int y = 0; y < m_row; y++)
 			for(int x = 0; x < m_col; x++)
-				action(m_nodes[y, x]);
+				action(m_nodes[y, x] as FlowFieldNode);
 	}
 
 	void GenerateIntegrationField(int targetX, int targetY)
@@ -159,7 +140,7 @@ public class FlowField : BaseGrid
 		if (x >= 0 && x < m_col && y >= 0 && y < m_row)
 		{
 			FlowFieldNode n = GetNode(x, y) as FlowFieldNode;
-			if (!n.IsObstacle() && n.Distance > 0 && n.Distance < min)
+			if (!n.IsObstacle() && n.Distance >= 0 && n.Distance < min)
 			{
 				min = n.Distance;
 				angle = (int)dir * 45;

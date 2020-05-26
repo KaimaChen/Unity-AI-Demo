@@ -1,17 +1,36 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public abstract class BaseGrid : MonoBehaviour
+public abstract class BaseGrid<T> : MonoBehaviour where T : BaseNode
 {
-    public const int c_costRoad = 1;
-    public const int c_costObstacle = 255;
+    public GameObject m_nodePrefab;
 
     protected int m_row;
     protected int m_col;
 
+    protected T[,] m_nodes;
+
     protected virtual void Awake()
     {
-        
+        byte[,] costField = InitCostField();
+
+        m_row = costField.GetLength(0);
+        m_col = costField.GetLength(1);
+
+        m_nodes = new T[m_row, m_col];
+        for(int y = 0; y < m_row; y++)
+        {
+            for(int x = 0; x < m_col; x++)
+            {
+                GameObject go = GameObject.Instantiate(m_nodePrefab);
+                go.transform.SetParent(transform);
+
+                m_nodes[y, x] = go.GetComponent<T>();
+                m_nodes[y, x].Init(x, y, costField[y, x]);
+            }
+        }
+
+        Generate();
     }
 
     protected virtual void Update()
@@ -20,14 +39,13 @@ public abstract class BaseGrid : MonoBehaviour
             AddObstacle();
         else if (Input.GetMouseButton(1))
             RemoveObstacle();
+        else if (Input.GetKeyDown(KeyCode.Space))
+            Generate();
     }
 
-    protected virtual byte[,] InitMap()
+    protected virtual byte[,] InitCostField()
     {
-        const int row = 6;
-        const int col = 9;
-
-        byte[,] map = new byte[row, col]
+        byte[,] costField = new byte[6, 9]
         {
             { 1, 1, 1, 1, 1, 1, 1, 1, 1 },
             { 1, 1, 1, 1, 1, 1, 1, 1, 1 },
@@ -37,10 +55,10 @@ public abstract class BaseGrid : MonoBehaviour
             { 1, 1, 1, 1, 1, 1, 1, 1, 1 },
         };
 
-        m_row = row;
-        m_col = col;
-        return map;
+        return costField;
     }
+
+    protected abstract void Generate();
 
     protected virtual bool AddObstacle()
     {
@@ -48,7 +66,7 @@ public abstract class BaseGrid : MonoBehaviour
         if(node != null)
         {
             byte last = node.Cost;
-            node.Cost = c_costObstacle;
+            node.Cost = Define.c_costObstacle;
             return last != node.Cost;
         }
 
@@ -61,7 +79,7 @@ public abstract class BaseGrid : MonoBehaviour
         if(node != null)
         {
             byte last = node.Cost;
-            node.Cost = c_costRoad;
+            node.Cost = Define.c_costRoad;
             return last != node.Cost;
         }
 
