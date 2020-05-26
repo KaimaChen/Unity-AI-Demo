@@ -6,6 +6,9 @@ public abstract class BaseGrid : MonoBehaviour
     public const int c_costRoad = 1;
     public const int c_costObstacle = 255;
 
+    protected int m_row;
+    protected int m_col;
+
     protected virtual void Awake()
     {
         
@@ -19,8 +22,25 @@ public abstract class BaseGrid : MonoBehaviour
             RemoveObstacle();
     }
 
-    protected abstract int Row();
-    protected abstract int Col();
+    protected virtual byte[,] InitMap()
+    {
+        const int row = 6;
+        const int col = 9;
+
+        byte[,] map = new byte[row, col]
+        {
+            { 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+            { 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+            { 1, 1, 255, 255, 255, 1, 1, 1, 1 },
+            { 1, 1, 1, 1, 255, 1, 1, 1, 1 },
+            { 1, 1, 1, 1, 255, 1, 1, 1, 1 },
+            { 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+        };
+
+        m_row = row;
+        m_col = col;
+        return map;
+    }
 
     protected virtual bool AddObstacle()
     {
@@ -96,7 +116,7 @@ public abstract class BaseGrid : MonoBehaviour
 
     void CheckAdd(int x, int y, List<BaseNode> list)
     {
-        if (x >= 0 && x < Col() && y >= 0 && y < Row())
+        if (x >= 0 && x < m_col && y >= 0 && y < m_row)
             list.Add(GetNode(x, y));
     }
 

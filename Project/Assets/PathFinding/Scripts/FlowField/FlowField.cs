@@ -12,54 +12,29 @@ public class FlowField : BaseGrid
 	private const int c_stateOpen = 1;
 	private const int c_stateClose = 2;
 
-	private const int c_row = 6;
-	private const int c_col = 9;
-
 	public FlowFieldShowType m_showType = FlowFieldShowType.All;
 	public GameObject m_nodePrafab;
 
-	FlowFieldNode[][] m_Nodes;
+	FlowFieldNode[,] m_nodes;
 
 	protected override void Awake()
 	{
 		base.Awake();
 
-		byte[][] grid = new byte[c_row][]
+		byte[,] map = InitMap();
+
+		m_nodes = new FlowFieldNode[m_row, m_col];
+		for(int y = 0; y < m_row; y++)
 		{
-			new byte[c_col] { 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-			new byte[c_col] { 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-			new byte[c_col] { 1, 1, 255, 255, 255, 1, 1, 1, 1 },
-			new byte[c_col] { 1, 1, 1, 1, 255, 1, 1, 1, 1 },
-			new byte[c_col] { 1, 1, 1, 1, 255, 1, 1, 1, 1 },
-			new byte[c_col] { 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-		};
-
-		m_Nodes = new FlowFieldNode[grid.Length][];
-
-		for (int y = 0; y < grid.Length; y++)
-		{
-			byte[] arr = grid[y];
-			m_Nodes[y] = new FlowFieldNode[arr.Length];
-
-			for (int x = 0; x < arr.Length; x++)
+			for(int x = 0; x < m_col; x++)
 			{
-				byte cost = arr[x];
-				m_Nodes[y][x] = GameObject.Instantiate(m_nodePrafab).GetComponent<FlowFieldNode>();
-				m_Nodes[y][x].Init(x, y, cost, transform);
+				byte cost = map[y, x];
+				m_nodes[y, x] = GameObject.Instantiate(m_nodePrafab).GetComponent<FlowFieldNode>();
+				m_nodes[y, x].Init(x, y, cost, transform);
 			}
 		}
 
 		Generate();
-	}
-
-	protected override int Row()
-	{
-		return c_row;
-	}
-
-	protected override int Col()
-	{
-		return c_col;
 	}
 
 	protected override bool AddObstacle()
@@ -90,27 +65,15 @@ public class FlowField : BaseGrid
 
 	void TraverseAllNode(Action<FlowFieldNode> action)
 	{
-		for (int y = 0; y < m_Nodes.Length; y++)
-		{
-			FlowFieldNode[] arr = m_Nodes[y];
-			for (int x = 0; x < arr.Length; x++)
-			{
-				action(arr[x]);
-			}
-		}
+		for(int y = 0; y < m_row; y++)
+			for(int x = 0; x < m_col; x++)
+				action(m_nodes[y, x]);
 	}
 
 	void GenerateIntegrationField(int targetX, int targetY)
 	{
 		//重置状态
-		for (int row = 0; row < m_Nodes.Length; row++)
-		{
-			FlowFieldNode[] arr = m_Nodes[row];
-			for (int col = 0; col < arr.Length; col++)
-			{
-				m_Nodes[row][col].Reset();
-			}
-		}
+		TraverseAllNode((node) => node.Reset());
 
 		//设置目标
 		Stack<FlowFieldNode> openStack = new Stack<FlowFieldNode>();
@@ -148,19 +111,12 @@ public class FlowField : BaseGrid
 
 	void GenerateFlowField()
 	{
-		for (int y = 0; y < m_Nodes.Length; y++)
-		{
-			FlowFieldNode[] arr = m_Nodes[y];
-			for (int x = 0; x < arr.Length; x++)
-			{
-				CalcDir(arr[x]);
-			}
-		}
+		TraverseAllNode((node) => CalcDir(node));
 	}
 
 	protected override BaseNode GetNode(int x, int y)
 	{
-		return m_Nodes[y][x];
+		return m_nodes[y, x];
 	}
 
 	//TODO 优化计算方向的方法
@@ -200,7 +156,7 @@ public class FlowField : BaseGrid
 
 	bool CalcDirHelper(int x, int y, Dir dir, ref int min, ref int angle)
 	{
-		if (x >= 0 && x < c_col && y >= 0 && y < c_row)
+		if (x >= 0 && x < m_col && y >= 0 && y < m_row)
 		{
 			FlowFieldNode n = GetNode(x, y) as FlowFieldNode;
 			if (!n.IsObstacle() && n.Distance > 0 && n.Distance < min)

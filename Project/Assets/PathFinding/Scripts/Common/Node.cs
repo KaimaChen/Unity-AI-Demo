@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// 节点类型
@@ -18,7 +16,8 @@ public enum NodeType
 }
 
 [RequireComponent(typeof(MeshRenderer))]
-public class Node : MonoBehaviour {
+public class Node : MonoBehaviour 
+{
     public Node parent = null;
 
     Vector2Int mPos; //在地图上的列与行
@@ -98,7 +97,10 @@ public class Node : MonoBehaviour {
         }
         else
         {
-            return p.GetCostFromStart(null) + CalcCostBetween(mPos, parent.mPos) * GetValue();
+            if (parent != null)
+                return p.GetCostFromStart(null) + CalcCostBetween(mPos, parent.mPos) * GetValue();
+            else
+                return p.GetCostFromStart(null);
         }
     }
 
