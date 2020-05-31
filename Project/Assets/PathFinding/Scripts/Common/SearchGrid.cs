@@ -1,6 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+/// <summary>
+/// 操作：
+/// 拖动起点和终点位置
+/// </summary>
 public class SearchGrid : BaseGrid<SearchNode>
 {
     public SearchAlgo m_searchAlgo;
@@ -11,6 +15,9 @@ public class SearchGrid : BaseGrid<SearchNode>
 
     private SearchNode m_startNode;
     private SearchNode m_endNode;
+
+    private bool m_dragStartNode;
+    private bool m_dragEndNode;
 
     private static SearchGrid m_instance;
 
@@ -34,10 +41,83 @@ public class SearchGrid : BaseGrid<SearchNode>
         m_endNode.SetSearchType(SearchType.End, false);
     }
 
+    protected override void Update()
+    {
+        if(Input.GetMouseButtonDown(0))
+        {
+            BaseNode node = GetMouseOverNode();
+            if (node == m_startNode)
+                m_dragStartNode = true;
+            else if (node == m_endNode)
+                m_dragEndNode = true;
+        }
+        else if(Input.GetMouseButtonUp(0))
+        {
+            m_dragStartNode = m_dragEndNode = false;
+        }
+        else if(Input.GetMouseButton(0))
+        {
+            if(m_dragStartNode)
+            {
+                SearchNode node = DragNode();
+                if (node != null)
+                {
+                    m_startNode.SetSearchType(SearchType.None, false);
+                    m_startNode = node;
+                    m_startNode.SetSearchType(SearchType.Start, false);
+                }
+            }
+            else if(m_dragEndNode)
+            {
+                SearchNode node = DragNode();
+                if (node != null)
+                {
+                    m_endNode.SetSearchType(SearchType.None, false);
+                    m_endNode = node;
+                    m_endNode.SetSearchType(SearchType.End, false);
+                }
+            }
+            else
+            {
+                AddObstacle();
+            }
+        }
+        else if(Input.GetMouseButton(1))
+        {
+            RemoveObstacle();
+        }
+        else if(Input.GetKeyDown(KeyCode.Space))
+        {
+            Generate();
+        }
+    }
+
     protected override void Generate()
     {
         Reset();
         StartCoroutine(Algorithm());
+    }
+
+    protected override bool AddObstacle()
+    {
+        BaseNode node = GetMouseOverNode();
+        if (node != null && node != m_startNode && node != m_endNode)
+        {
+            byte last = node.Cost;
+            node.SetCost(Define.c_costObstacle);
+            return last != node.Cost;
+        }
+
+        return false;
+    }
+
+    private SearchNode DragNode()
+    {
+        SearchNode node = GetMouseOverNode();
+        if (node != null && node != m_startNode && node != m_endNode && node.IsObstacle() == false)
+            return node;
+        else
+            return null;
     }
 
     private void Reset()

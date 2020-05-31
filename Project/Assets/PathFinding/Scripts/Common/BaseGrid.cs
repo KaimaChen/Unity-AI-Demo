@@ -1,6 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
+/// <summary>
+/// 操作：
+/// 左键点击：添加障碍
+/// 右键点击：移除障碍
+/// 空格键：开始寻路
+/// </summary>
 public abstract class BaseGrid<T> : MonoBehaviour where T : BaseNode
 {
     public GameObject m_nodePrefab;
@@ -65,13 +71,13 @@ public abstract class BaseGrid<T> : MonoBehaviour where T : BaseNode
         return false;
     }
 
-    BaseNode GetMouseOverNode()
+    protected T GetMouseOverNode()
     {
-        BaseNode result = null;
+        T result = null;
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if(Physics.Raycast(ray, out RaycastHit hit))
-            result = hit.collider.GetComponent<BaseNode>();
+            result = hit.collider.GetComponent<T>();
 
         return result;
     }
