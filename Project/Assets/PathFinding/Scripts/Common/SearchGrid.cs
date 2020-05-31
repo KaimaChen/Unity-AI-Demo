@@ -69,6 +69,12 @@ public class SearchGrid : BaseGrid<SearchNode>
             case SearchAlgo.BestFirstSearch:
                 algo = new BestFirstSearch(m_startNode, m_endNode, m_nodes, m_diagonalMovement, m_weight, m_showTime);
                 break;
+            case SearchAlgo.BreadthFirstSearch:
+                algo = new BreadthFirstSearch(m_startNode, m_endNode, m_nodes, m_diagonalMovement, m_weight, m_showTime);
+                break;
+            case SearchAlgo.DijkstraSearch:
+                algo = new DijkstraSearch(m_startNode, m_endNode, m_nodes, m_diagonalMovement, m_weight, m_showTime);
+                break;
             default:
                 Debug.LogError($"No code for SearchAlgo={m_searchAlgo}");
                 break;

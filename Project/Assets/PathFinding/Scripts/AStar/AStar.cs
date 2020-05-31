@@ -10,7 +10,7 @@ using UnityEngine;
 public class AStar : BaseSearchAlgo
 {
     private readonly float m_weight = 1;
-    protected readonly List<Vector2Int> mOpenList = new List<Vector2Int>();
+    protected readonly List<Vector2Int> m_openList = new List<Vector2Int>();
 
     public AStar(SearchNode start, SearchNode end, SearchNode[,] nodes, DiagonalMovement diagonal, float weight, float showTime)
         : base(start, end, nodes, diagonal, showTime)
@@ -22,11 +22,10 @@ public class AStar : BaseSearchAlgo
     {
         m_start.G = 0;
 
-        mOpenList.Add(m_start.Pos);
-        m_start.Opened = true;
-        while (mOpenList.Count > 0)
+        AddOpenList(m_start);
+        while (OpenListSize() > 0)
         {
-            Vector2Int curtPos = PopMinInOpenList();
+            Vector2Int curtPos = PopOpenList();
             SearchNode curtNode = GetNode(curtPos);
 
             if (curtPos == m_end.Pos) //找到终点
@@ -72,24 +71,26 @@ public class AStar : BaseSearchAlgo
             neighbor.SetParent(curtNode, newG);
 
         if (neighbor.Opened == false)
-        {
-            mOpenList.Add(neighbor.Pos);
-            neighbor.Opened = true;
+            AddOpenList(neighbor);
+    }
 
-            neighbor.SetSearchType(SearchType.Open, true);
-        }
+    protected virtual void AddOpenList(SearchNode node)
+    {
+        m_openList.Add(node.Pos);
+        node.Opened = true;
+        node.SetSearchType(SearchType.Open, true);
     }
 
     /// <summary>
     /// 在open list中找成本最低的节点并去掉
     /// </summary>
-    Vector2Int PopMinInOpenList()
+    protected virtual Vector2Int PopOpenList()
     {
-        float min = GetNode(mOpenList[0]).F(m_weight);
+        float min = GetNode(m_openList[0]).F(m_weight);
         int minIndex = 0;
-        for (int i = 1; i < mOpenList.Count; i++)
+        for (int i = 1; i < m_openList.Count; i++)
         {
-            float score = GetNode(mOpenList[i]).F(m_weight);
+            float score = GetNode(m_openList[i]).F(m_weight);
             if (score < min)
             {
                 min = score;
@@ -97,9 +98,14 @@ public class AStar : BaseSearchAlgo
             }
         }
 
-        Vector2Int result = mOpenList[minIndex];
-        mOpenList.RemoveAt(minIndex);
+        Vector2Int result = m_openList[minIndex];
+        m_openList.RemoveAt(minIndex);
 
         return result;
+    }
+
+    protected virtual int OpenListSize()
+    {
+        return m_openList.Count;
     }
 }

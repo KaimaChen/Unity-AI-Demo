@@ -25,7 +25,7 @@ public class ThetaStar : AStar
 
         if (!neighbor.Opened)
         {
-            mOpenList.Add(neighbor.Pos);
+            m_openList.Add(neighbor.Pos);
             neighbor.Opened = true;
 
             neighbor.SetSearchType(SearchType.Open, true);

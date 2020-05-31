@@ -71,6 +71,8 @@ public enum SearchAlgo
 {
 	AStar,
 	BestFirstSearch,
+	BreadthFirstSearch,
+	DijkstraSearch,
 	ThetaStar,
 }
 
