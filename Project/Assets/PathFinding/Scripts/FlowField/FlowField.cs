@@ -13,11 +13,79 @@ public class FlowField : BaseGrid<FlowFieldNode>
 	private const int c_stateClose = 2;
 
 	public FlowFieldShowType m_showType = FlowFieldShowType.All;
-	public Vector2Int m_targetPos;
+	private FlowFieldNode m_targetNode;
+	private bool m_dragTarget;
+
+	protected override void Awake()
+	{
+		base.Awake();
+
+		m_targetNode = GetNode(0, 0);
+		m_targetNode.SetIsTarget(true);
+		Generate();
+	}
+
+	protected override void Update()
+	{
+		if(Input.GetMouseButtonDown(0))
+		{
+			BaseNode node = GetMouseOverNode();
+			if (node == m_targetNode)
+				m_dragTarget = true;
+		}
+		else if(Input.GetMouseButtonUp(0))
+		{
+			m_dragTarget = false;
+		}
+		else if(Input.GetMouseButton(0))
+		{
+			if(m_dragTarget)
+			{
+				FlowFieldNode node = DragNode();
+				if(node != null)
+				{
+					m_targetNode.SetIsTarget(false);
+					m_targetNode = node;
+					m_targetNode.SetIsTarget(true);
+					Generate();
+				}
+			}
+			else
+			{
+				AddObstacle();
+			}
+		}
+		else if(Input.GetMouseButton(1))
+		{
+			RemoveObstacle();
+		}
+		else if(Input.GetKeyDown(KeyCode.Space))
+		{
+			Generate();
+		}
+	}
+
+	private FlowFieldNode DragNode()
+	{
+		FlowFieldNode node = GetMouseOverNode();
+		if (node != null && node != m_targetNode && node.IsObstacle() == false)
+			return node;
+		else
+			return null;
+	}
 
 	protected override bool AddObstacle()
 	{
-		bool result = base.AddObstacle();
+		bool result = false;
+
+		BaseNode node = GetMouseOverNode();
+		if (node != null && node != m_targetNode)
+		{
+			byte last = node.Cost;
+			node.SetCost(Define.c_costObstacle);
+			result = last != node.Cost;
+		}
+
 		if (result)
 			Generate();
 
@@ -35,8 +103,8 @@ public class FlowField : BaseGrid<FlowFieldNode>
 
 	protected override void Generate()
 	{
-		int tx = Mathf.Clamp(m_targetPos.x, 0, m_col - 1);
-		int ty = Mathf.Clamp(m_targetPos.y, 0, m_row - 1);
+		int tx = Mathf.Clamp(m_targetNode.X, 0, m_col - 1);
+		int ty = Mathf.Clamp(m_targetNode.Y, 0, m_row - 1);
 
 		GenerateIntegrationField(tx, ty);
 		GenerateFlowField();

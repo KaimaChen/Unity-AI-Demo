@@ -9,6 +9,7 @@ public class FlowFieldNode : BaseNode
 	private int m_distance = k_NoInit; //到目标的移动距离（非欧几里德距离）
 	private int m_dir = k_NoAngle;
 	private byte m_state; //0=未处理，1=IsOpen, 2=IsClose
+	private bool m_isTarget;
 
 	[SerializeField] private MeshRenderer m_bgRenderer;
 	private Material m_bgMat;
@@ -115,14 +116,17 @@ public class FlowFieldNode : BaseNode
 		}
 	}
 
-	private static Color GetColor(byte cost)
+	private Color GetColor(byte cost)
 	{
-		switch (cost)
-		{
-			case Define.c_costObstacle:
-				return Color.black;
-			default:
-				return Color.white;
-		}
+		if (m_isTarget)
+			return Color.red;
+		else
+			return Define.Cost2Color(cost);
+	}
+
+	public void SetIsTarget(bool isTarget)
+	{
+		m_isTarget = isTarget;
+		m_bgMat.color = GetColor(m_cost);
 	}
 }
