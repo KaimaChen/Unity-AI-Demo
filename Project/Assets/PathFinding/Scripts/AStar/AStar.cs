@@ -12,7 +12,7 @@ public class AStar : BaseSearchAlgo
 
     private readonly float m_showTime;
 
-    public AStar(Vector2Int start, Vector2Int end, SearchNode[,] nodes, DiagonalMovement diagonal, float showTime)
+    public AStar(SearchNode start, SearchNode end, SearchNode[,] nodes, DiagonalMovement diagonal, float showTime)
         : base(start, end, nodes, diagonal)
     {
         m_showTime = showTime;
@@ -20,13 +20,15 @@ public class AStar : BaseSearchAlgo
 
     public override IEnumerator Process()
     {
-        mOpenList.Add(m_start);
+        m_start.G = 0;
+
+        mOpenList.Add(m_start.Pos);
         while (mOpenList.Count > 0)
         {
-            Vector2Int curtPos = FindMinInOpenList();
+            Vector2Int curtPos = PopMinInOpenList();
             SearchNode curtNode = GetNode(curtPos);
 
-            if (curtPos == m_end) //找到终点
+            if (curtPos == m_end.Pos) //找到终点
             {
                 break;
             }
@@ -34,8 +36,7 @@ public class AStar : BaseSearchAlgo
             {
                 #region show
                 yield return new WaitForSeconds(m_showTime); //等待一点时间，以便观察
-                if (curtPos != m_start && curtPos != m_end)
-                    curtNode.SetSearchType(SearchType.Expanded);
+                curtNode.SetSearchType(SearchType.Expanded, true);
                 #endregion
 
                 mCloseList.Add(curtPos);
@@ -53,10 +54,10 @@ public class AStar : BaseSearchAlgo
         }
 
         //绘制出最终的路径
-        SearchNode lastNode = GetNode(m_end);
+        SearchNode lastNode = GetNode(m_end.Pos);
         while (lastNode != null)
         {
-            lastNode.SetSearchType(SearchType.Path);
+            lastNode.SetSearchType(SearchType.Path, true);
             lastNode = lastNode.Parent;
         }
 
@@ -65,21 +66,27 @@ public class AStar : BaseSearchAlgo
 
     protected virtual void UpdateVertex(SearchNode curtNode, SearchNode neighbor)
     {
+        Vector2Int cp = curtNode.Pos;
+        Vector2Int np = neighbor.Pos;
         bool isOpen = mOpenList.Contains(neighbor.Pos);
         float oldG = isOpen ? neighbor.G : float.MaxValue;
-        float newG = curtNode.G + SearchGrid.Instance.CalcHeuristic(curtNode.Pos, neighbor.Pos);
+        float newG = curtNode.G + ((cp.x - np.x == 0 || cp.y - np.y == 0) ? 1 : Define.c_sqrt2);
 
         if (newG < oldG)
             neighbor.SetParent(curtNode, newG);
 
         if (!isOpen)
+        {
             mOpenList.Add(neighbor.Pos);
+
+            neighbor.SetSearchType(SearchType.Open, true);
+        }
     }
 
     /// <summary>
     /// 在open list中找成本最低的节点并去掉
     /// </summary>
-    Vector2Int FindMinInOpenList()
+    Vector2Int PopMinInOpenList()
     {
         float min = GetNode(mOpenList[0]).F;
         int minIndex = 0;

@@ -27,13 +27,30 @@ public class SearchGrid : BaseGrid<SearchNode>
 
         m_instance = this;
 
-        m_startNode = GetNode(0, 0);
-        m_endNode = GetNode(m_nodes.GetLength(1) - 1, 0);
+        m_startNode = GetNode(0, m_row / 2);
+        m_startNode.SetSearchType(SearchType.Start, false);
+        m_endNode = GetNode(m_col - 1, m_row / 2);
+        m_endNode.SetSearchType(SearchType.End, false);
     }
 
     protected override void Generate()
     {
+        Reset();
         StartCoroutine(Algorithm());
+    }
+
+    private void Reset()
+    {
+        for(int y = 0; y < m_row; y++)
+        {
+            for(int x = 0; x < m_col; x++)
+            {
+                m_nodes[y, x].Reset();
+            }
+        }
+
+        m_startNode.SetSearchType(SearchType.Start, false);
+        m_endNode.SetSearchType(SearchType.End, false);
     }
 
     public IEnumerator Algorithm()
@@ -43,7 +60,7 @@ public class SearchGrid : BaseGrid<SearchNode>
         switch(m_searchAlgo)
         {
             case SearchAlgo.AStar:
-                algo = new AStar(m_startNode.Pos, m_endNode.Pos, m_nodes, m_diagonalMovement, m_showTime);
+                algo = new AStar(m_startNode, m_endNode, m_nodes, m_diagonalMovement, m_showTime);
                 break;
             default:
                 Debug.LogError($"No code for SearchAlgo={m_searchAlgo}");

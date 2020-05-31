@@ -5,33 +5,13 @@ public abstract class BaseGrid<T> : MonoBehaviour where T : BaseNode
 {
     public GameObject m_nodePrefab;
     
-    protected int m_row;
-    protected int m_col;
+    protected int m_row = 8;
+    protected int m_col = 15;
 
     protected T[,] m_nodes;
 
-    protected virtual byte[,] InitCostField()
-    {
-        byte[,] costField = new byte[6, 9]
-        {
-            { 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-            { 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-            { 1, 1, 255, 255, 255, 1, 1, 1, 1 },
-            { 1, 1, 1, 1, 255, 1, 1, 1, 1 },
-            { 1, 1, 1, 1, 255, 1, 1, 1, 1 },
-            { 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-        };
-
-        return costField;
-    }
-
     protected virtual void Awake()
     {
-        byte[,] costField = InitCostField();
-
-        m_row = costField.GetLength(0);
-        m_col = costField.GetLength(1);
-
         m_nodes = new T[m_row, m_col];
         for(int y = 0; y < m_row; y++)
         {
@@ -39,10 +19,10 @@ public abstract class BaseGrid<T> : MonoBehaviour where T : BaseNode
             {
                 GameObject go = GameObject.Instantiate(m_nodePrefab);
                 go.transform.SetParent(transform);
-                go.transform.localPosition = new Vector3(x, m_row - y, 0);
+                go.transform.localPosition = new Vector3(x, y, 0);
 
                 m_nodes[y, x] = go.GetComponent<T>();
-                m_nodes[y, x].Init(x, y, costField[y, x]);
+                m_nodes[y, x].Init(x, y, 0);
             }
         }
     }
@@ -65,7 +45,7 @@ public abstract class BaseGrid<T> : MonoBehaviour where T : BaseNode
         if(node != null)
         {
             byte last = node.Cost;
-            node.Cost = Define.c_costObstacle;
+            node.SetCost(Define.c_costObstacle);
             return last != node.Cost;
         }
 
@@ -78,7 +58,7 @@ public abstract class BaseGrid<T> : MonoBehaviour where T : BaseNode
         if(node != null)
         {
             byte last = node.Cost;
-            node.Cost = Define.c_costRoad;
+            node.SetCost(Define.c_costRoad);
             return last != node.Cost;
         }
 

@@ -1,16 +1,16 @@
 ﻿using UnityEngine;
+using UnityEditor;
 
 public class SearchNode : BaseNode
 {
-    private SearchNode m_parent;
+    [SerializeField] private float m_g = float.MaxValue;
+    [SerializeField] private float m_h = -1;
+    [SerializeField] private SearchNode m_parent;
+    [SerializeField] private SearchType m_searchType;
 
-    MeshRenderer m_renderer;
-    Material m_mat;
+    private MeshRenderer m_renderer;
+    private Material m_mat;
     
-    SearchType m_searchType;
-    float m_g = float.MaxValue;
-    float m_h = float.MaxValue;
-
     #region get-set
     public SearchNode Parent
     {
@@ -23,14 +23,32 @@ public class SearchNode : BaseNode
         set { m_g = value; }
     }
 
-    public float H
+    public float F
     {
-        get { return m_h; }
-        set { m_h = value; }
-    }
+        get
+        {
+            if(m_h < 0)
+                m_h = SearchGrid.Instance.CalcHeuristic(Pos, SearchGrid.Instance.EndNode.Pos);
 
-    public float F { get { return m_g + m_h; } }
+            return m_g + m_h;
+        }
+    }
     #endregion
+
+    private void OnDrawGizmosSelected()
+    {
+        Handles.color = Color.black;
+
+        SearchNode curt = this;
+        SearchNode prev = m_parent;
+        while(curt != null && prev != null)
+        {
+            Handles.DrawLine(curt.transform.position, prev.transform.position);
+
+            curt = prev;
+            prev = prev.Parent;
+        }
+    }
 
     public override void Init(int x, int y, byte cost)
     {
@@ -41,8 +59,27 @@ public class SearchNode : BaseNode
         m_mat.color = Define.Cost2Color(cost);
     }
 
-    public void SetSearchType(SearchType type)
+    public void Reset()
     {
+        m_g = float.MaxValue;
+        m_h = -1;
+        m_parent = null;
+
+        m_mat.color = Define.Cost2Color(m_cost);
+        m_searchType = SearchType.None;
+    }
+
+    public override void SetCost(byte cost)
+    {
+        base.SetCost(cost);
+        m_mat.color = Define.Cost2Color(cost);
+    }
+
+    public void SetSearchType(SearchType type, bool excludeStartEnd)
+    {
+        if (excludeStartEnd && (m_searchType == SearchType.Start || m_searchType == SearchType.End))
+            return;
+
         m_searchType = type;
         m_mat.color = Define.SearchType2Color(type);
     }
@@ -51,6 +88,5 @@ public class SearchNode : BaseNode
     {
         m_parent = parent;
         m_g = g;
-        m_h = SearchGrid.Instance.CalcHeuristic(Pos, SearchGrid.Instance.EndNode.Pos);
     }
 }

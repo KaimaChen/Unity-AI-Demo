@@ -13,11 +13,7 @@ public class BaseNode : MonoBehaviour
 
     public Vector2Int Pos { get { return new Vector2Int(m_x, m_y); } }
 
-    public byte Cost
-    {
-        get { return m_cost; }
-        set { m_cost = value; }
-    }
+    public byte Cost { get { return m_cost; } }
     #endregion
 
     protected virtual void Awake()
@@ -36,5 +32,10 @@ public class BaseNode : MonoBehaviour
     public bool IsObstacle()
     {
         return m_cost == Define.c_costObstacle;
+    }
+
+    public virtual void SetCost(byte cost)
+    {
+        m_cost = cost;
     }
 }

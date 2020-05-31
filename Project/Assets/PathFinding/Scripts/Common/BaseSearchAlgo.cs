@@ -4,12 +4,12 @@ using UnityEngine;
 
 public abstract class BaseSearchAlgo
 {
-    protected readonly Vector2Int m_start;
-    protected readonly Vector2Int m_end;
+    protected readonly SearchNode m_start;
+    protected readonly SearchNode m_end;
     protected readonly SearchNode[,] m_nodes;
     private readonly DiagonalMovement m_diagonalMovement;
 
-    public BaseSearchAlgo(Vector2Int start, Vector2Int end, SearchNode[,] nodes, DiagonalMovement diagonal)
+    public BaseSearchAlgo(SearchNode start, SearchNode end, SearchNode[,] nodes, DiagonalMovement diagonal)
     {
         m_start = start;
         m_end = end;

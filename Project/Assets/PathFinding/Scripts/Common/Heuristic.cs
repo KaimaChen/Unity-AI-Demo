@@ -5,8 +5,6 @@
 /// </summary>
 public static class Heuristic
 {
-    private static readonly float c_Sqrt2 = Mathf.Sqrt(2);
-
     /// <summary>
     /// 曼哈顿距离
     /// 适用场景：四方向网格移动
@@ -46,7 +44,7 @@ public static class Heuristic
     public static float Octile(int dx, int dy)
     {
         //做法：先走45度斜线，然后走剩余的x或y方向
-        float f = c_Sqrt2 - 1;
+        float f = Define.c_sqrt2 - 1;
         return (dx < dy) ? f * dx + dy : f * dy + dx;
     }
 

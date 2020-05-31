@@ -4,6 +4,7 @@ public static class Define
 {
 	public const int c_costRoad = 1;
 	public const int c_costObstacle = 255;
+	public static readonly float c_sqrt2 = Mathf.Sqrt(2);
 
 	public static Color Cost2Color(int cost)
 	{
@@ -30,6 +31,8 @@ public static class Define
 				return new Color(0.5f, 0, 0, 1);
 			case SearchType.End:
 				return new Color(1, 0, 0, 1);
+			case SearchType.Open:
+				return new Color(0, 0.5f, 0.5f, 1);
 			case SearchType.Expanded:
 				return Color.cyan;
 			case SearchType.Path:
@@ -56,8 +59,10 @@ public enum Dir
 
 public enum SearchType
 {
+	None,
 	Start,
 	End,
+	Open,
 	Expanded,
 	Path,
 }
