@@ -4,11 +4,26 @@ using System.Collections.Generic;
 public abstract class BaseGrid<T> : MonoBehaviour where T : BaseNode
 {
     public GameObject m_nodePrefab;
-
+    
     protected int m_row;
     protected int m_col;
 
     protected T[,] m_nodes;
+
+    protected virtual byte[,] InitCostField()
+    {
+        byte[,] costField = new byte[6, 9]
+        {
+            { 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+            { 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+            { 1, 1, 255, 255, 255, 1, 1, 1, 1 },
+            { 1, 1, 1, 1, 255, 1, 1, 1, 1 },
+            { 1, 1, 1, 1, 255, 1, 1, 1, 1 },
+            { 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+        };
+
+        return costField;
+    }
 
     protected virtual void Awake()
     {
@@ -24,13 +39,12 @@ public abstract class BaseGrid<T> : MonoBehaviour where T : BaseNode
             {
                 GameObject go = GameObject.Instantiate(m_nodePrefab);
                 go.transform.SetParent(transform);
+                go.transform.localPosition = new Vector3(x, m_row - y, 0);
 
                 m_nodes[y, x] = go.GetComponent<T>();
                 m_nodes[y, x].Init(x, y, costField[y, x]);
             }
         }
-
-        Generate();
     }
 
     protected virtual void Update()
@@ -41,21 +55,6 @@ public abstract class BaseGrid<T> : MonoBehaviour where T : BaseNode
             RemoveObstacle();
         else if (Input.GetKeyDown(KeyCode.Space))
             Generate();
-    }
-
-    protected virtual byte[,] InitCostField()
-    {
-        byte[,] costField = new byte[6, 9]
-        {
-            { 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-            { 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-            { 1, 1, 255, 255, 255, 1, 1, 1, 1 },
-            { 1, 1, 1, 1, 255, 1, 1, 1, 1 },
-            { 1, 1, 1, 1, 255, 1, 1, 1, 1 },
-            { 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-        };
-
-        return costField;
     }
 
     protected abstract void Generate();
@@ -138,5 +137,8 @@ public abstract class BaseGrid<T> : MonoBehaviour where T : BaseNode
             list.Add(GetNode(x, y));
     }
 
-    protected abstract BaseNode GetNode(int x, int y);
+    protected virtual T GetNode(int x, int y)
+    {
+        return m_nodes[y, x];
+    }
 }

@@ -61,3 +61,16 @@ public enum SearchType
 	Expanded,
 	Path,
 }
+
+public enum SearchAlgo
+{
+	AStar,
+}
+
+public enum DiagonalMovement
+{
+	Never,
+	Always,
+	IfAtMostOneObstacle,
+	OnlyWhenNoObstacles, //两边都没有障碍时才能走斜线
+}

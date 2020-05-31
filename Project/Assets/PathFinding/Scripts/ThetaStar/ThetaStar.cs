@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ThetaStar : AStar
+public class ThetaStar : OldAStar
 {
     protected override void InitMap()
     {

@@ -6,7 +6,7 @@ using UnityEngine;
 /// <summary>
 /// A*寻路
 /// </summary>
-public class AStar : BaseMap
+public class OldAStar : BaseMap
 {
     protected readonly List<Vector2Int> mOpenList = new List<Vector2Int>();
     protected readonly List<Vector2Int> mCloseList = new List<Vector2Int>();

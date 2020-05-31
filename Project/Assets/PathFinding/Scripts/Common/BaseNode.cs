@@ -11,6 +11,8 @@ public class BaseNode : MonoBehaviour
 
     public int Y { get { return m_y; } }
 
+    public Vector2Int Pos { get { return new Vector2Int(m_x, m_y); } }
+
     public byte Cost
     {
         get { return m_cost; }

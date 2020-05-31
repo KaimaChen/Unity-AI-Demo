@@ -95,11 +95,6 @@ public class FlowField : BaseGrid<FlowFieldNode>
 		TraverseAllNode((node) => CalcDir(node));
 	}
 
-	protected override BaseNode GetNode(int x, int y)
-	{
-		return m_nodes[y, x];
-	}
-
 	//TODO 优化计算方向的方法
 	void CalcDir(FlowFieldNode node)
 	{
