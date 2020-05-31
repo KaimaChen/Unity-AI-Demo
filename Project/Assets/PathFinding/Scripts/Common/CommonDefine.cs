@@ -11,7 +11,7 @@ public static class Define
 		switch(cost)
 		{
 			case 1:
-				return Color.gray;
+				return Color.white;
 			case 2:
 				return Color.green;
 			case 3:
@@ -70,6 +70,8 @@ public enum SearchType
 public enum SearchAlgo
 {
 	AStar,
+	BestFirstSearch,
+	ThetaStar,
 }
 
 public enum DiagonalMovement

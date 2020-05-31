@@ -2,20 +2,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//TODO 使用小顶堆
+
 /// <summary>
 /// A*寻路
 /// </summary>
 public class AStar : BaseSearchAlgo
 {
-    private readonly List<Vector2Int> mOpenList = new List<Vector2Int>();
-    private readonly HashSet<Vector2Int> mCloseList = new HashSet<Vector2Int>();
+    private readonly float m_weight = 1;
+    protected readonly List<Vector2Int> mOpenList = new List<Vector2Int>();
 
-    private readonly float m_showTime;
-
-    public AStar(SearchNode start, SearchNode end, SearchNode[,] nodes, DiagonalMovement diagonal, float showTime)
-        : base(start, end, nodes, diagonal)
+    public AStar(SearchNode start, SearchNode end, SearchNode[,] nodes, DiagonalMovement diagonal, float weight, float showTime)
+        : base(start, end, nodes, diagonal, showTime)
     {
-        m_showTime = showTime;
+        m_weight = weight;
     }
 
     public override IEnumerator Process()
@@ -23,6 +23,7 @@ public class AStar : BaseSearchAlgo
         m_start.G = 0;
 
         mOpenList.Add(m_start.Pos);
+        m_start.Opened = true;
         while (mOpenList.Count > 0)
         {
             Vector2Int curtPos = PopMinInOpenList();
@@ -39,16 +40,14 @@ public class AStar : BaseSearchAlgo
                 curtNode.SetSearchType(SearchType.Expanded, true);
                 #endregion
 
-                mCloseList.Add(curtPos);
+                curtNode.Closed = true;
+
                 List<SearchNode> neighbors = GetNeighbors(curtPos);
                 for (int i = 0; i < neighbors.Count; i++)
                 {
                     SearchNode neighbor = neighbors[i];
-                    Vector2Int p = neighbor.Pos;
-                    if (!mCloseList.Contains(p))
-                    {
+                    if (neighbor.Closed == false)
                         UpdateVertex(curtNode, neighbor);
-                    }
                 }
             }
         }
@@ -66,18 +65,16 @@ public class AStar : BaseSearchAlgo
 
     protected virtual void UpdateVertex(SearchNode curtNode, SearchNode neighbor)
     {
-        Vector2Int cp = curtNode.Pos;
-        Vector2Int np = neighbor.Pos;
-        bool isOpen = mOpenList.Contains(neighbor.Pos);
-        float oldG = isOpen ? neighbor.G : float.MaxValue;
-        float newG = curtNode.G + ((cp.x - np.x == 0 || cp.y - np.y == 0) ? 1 : Define.c_sqrt2);
+        float oldG = neighbor.Opened ? neighbor.G : float.MaxValue;
+        float newG = curtNode.G + CalcG(curtNode, neighbor);
 
         if (newG < oldG)
             neighbor.SetParent(curtNode, newG);
 
-        if (!isOpen)
+        if (neighbor.Opened == false)
         {
             mOpenList.Add(neighbor.Pos);
+            neighbor.Opened = true;
 
             neighbor.SetSearchType(SearchType.Open, true);
         }
@@ -88,11 +85,11 @@ public class AStar : BaseSearchAlgo
     /// </summary>
     Vector2Int PopMinInOpenList()
     {
-        float min = GetNode(mOpenList[0]).F;
+        float min = GetNode(mOpenList[0]).F(m_weight);
         int minIndex = 0;
         for (int i = 1; i < mOpenList.Count; i++)
         {
-            float score = GetNode(mOpenList[i]).F;
+            float score = GetNode(mOpenList[i]).F(m_weight);
             if (score < min)
             {
                 min = score;

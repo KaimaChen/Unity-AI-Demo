@@ -22,7 +22,7 @@ public abstract class BaseGrid<T> : MonoBehaviour where T : BaseNode
                 go.transform.localPosition = new Vector3(x, y, 0);
 
                 m_nodes[y, x] = go.GetComponent<T>();
-                m_nodes[y, x].Init(x, y, 0);
+                m_nodes[y, x].Init(x, y, Define.c_costRoad);
             }
         }
     }

@@ -1,46 +1,35 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class ThetaStar : OldAStar
+public class ThetaStar : AStar
 {
-    protected override void InitMap()
-    {
-        map = new int[ROW, COL]
-        {
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-            {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 5, 1, 0 },
-            {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0 },
-            {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0 },
-            {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0 },
-            {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 },
-            {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 },
-            {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 },
-            {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 },
-            {0, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 },
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-        };
-    }
+    public ThetaStar(SearchNode start, SearchNode end, SearchNode[,] nodes, DiagonalMovement diagonal, float weight, float showTime)
+        : base(start, end, nodes, diagonal, weight, showTime)
+    { }
 
-    protected override void UpdateVertex(Vector2Int curtPos, Vector2Int neighborPos)
+    protected override void UpdateVertex(SearchNode curtNode, SearchNode neighbor)
     {
-        bool isOpen = mOpenList.Contains(neighborPos);
-        Node curt = mPos2Node[curtPos];
-        Node neighbor = mPos2Node[neighborPos];
-
-        if (curt.parent != null && LineOfSign(curt.parent.Pos, neighborPos))
+        if (curtNode.Parent != null && LineOfSign(curtNode.Parent.Pos, neighbor.Pos))
         {
-            if (!isOpen || neighbor.GetCostFromStart(null) > neighbor.GetCostFromStart(curt.parent))
-                neighbor.SetParent(curt.parent);
+            float oldG = neighbor.G;
+            float newG = curtNode.Parent.G + CalcG(curtNode.Parent, neighbor);
+            if (!neighbor.Opened || newG < oldG)
+                neighbor.SetParent(curtNode.Parent, newG);
         }
         else
         {
-            if (!isOpen || neighbor.GetCostFromStart(null) > neighbor.GetCostFromStart(mPos2Node[curtPos]))
-                neighbor.SetParent(curt);
+            float oldG = neighbor.G;
+            float newG = curtNode.G + CalcG(curtNode, neighbor);
+            if (!neighbor.Opened || newG < oldG)
+                neighbor.SetParent(curtNode, newG);
         }
 
-        if (!isOpen)
-            mOpenList.Add(neighborPos);
+        if (!neighbor.Opened)
+        {
+            mOpenList.Add(neighbor.Pos);
+            neighbor.Opened = true;
+
+            neighbor.SetSearchType(SearchType.Open, true);
+        }
     }
 
     private bool LineOfSign(Vector2Int start, Vector2Int end)
@@ -58,7 +47,7 @@ public class ThetaStar : OldAStar
         {
             for(x = start.x; x != end.x; x += ux)
             {
-                if (map[y, x] == 0)
+                if (GetNode(x, y).IsObstacle())
                     return false;
 
                 eps += dy;
@@ -67,7 +56,7 @@ public class ThetaStar : OldAStar
                     if(x != start.x) //处理斜线移动的可移动性判断
                     {
                         //如果附近两个都是障碍，那么不可以走
-                        if (map[y, x + ux] == 0 && map[y + uy, x - ux] == 0)
+                        if (GetNode(x + ux, y).IsObstacle() && GetNode(x - ux, y + uy).IsObstacle())
                             return false;
                     }
 
@@ -80,7 +69,7 @@ public class ThetaStar : OldAStar
         {
             for(y = start.y; y != end.y; y += uy)
             {
-                if (map[y, x] == 0)
+                if (GetNode(x, y).IsObstacle())
                     return false;
 
                 eps += dx;
@@ -88,7 +77,7 @@ public class ThetaStar : OldAStar
                 {
                     if(y != start.y)
                     {
-                        if (map[y + uy, x] == 0 && map[y - uy, x + ux] == 0)
+                        if (GetNode(x, y + uy).IsObstacle() && GetNode(x + ux, y - uy).IsObstacle())
                             return false;
                     }
 

@@ -9,12 +9,15 @@ public abstract class BaseSearchAlgo
     protected readonly SearchNode[,] m_nodes;
     private readonly DiagonalMovement m_diagonalMovement;
 
-    public BaseSearchAlgo(SearchNode start, SearchNode end, SearchNode[,] nodes, DiagonalMovement diagonal)
+    protected readonly float m_showTime;
+
+    public BaseSearchAlgo(SearchNode start, SearchNode end, SearchNode[,] nodes, DiagonalMovement diagonal, float showTime)
     {
         m_start = start;
         m_end = end;
         m_nodes = nodes;
         m_diagonalMovement = diagonal;
+        m_showTime = showTime;
     }
 
     public abstract IEnumerator Process();
@@ -93,5 +96,12 @@ public abstract class BaseSearchAlgo
     protected SearchNode GetNode(Vector2Int pos)
     {
         return GetNode(pos.x, pos.y);
+    }
+
+    protected virtual float CalcG(SearchNode a, SearchNode b)
+    {
+        Vector2Int ap = a.Pos;
+        Vector2Int bp = b.Pos;
+        return Heuristic.Octile(ap, bp) * b.Cost; //TODO 对于FlowField，需要把直线上的所有格子代价都加进来
     }
 }

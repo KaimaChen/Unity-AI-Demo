@@ -7,6 +7,8 @@ public class SearchNode : BaseNode
     [SerializeField] private float m_h = -1;
     [SerializeField] private SearchNode m_parent;
     [SerializeField] private SearchType m_searchType;
+    [SerializeField] private bool m_opened;
+    [SerializeField] private bool m_closed;
 
     private MeshRenderer m_renderer;
     private Material m_mat;
@@ -17,21 +19,22 @@ public class SearchNode : BaseNode
         get { return m_parent; }
     }
 
+    public bool Opened
+    {
+        get { return m_opened; }
+        set { m_opened = value; }
+    }
+
+    public bool Closed
+    {
+        get { return m_closed; }
+        set { m_closed = value; }
+    }
+
     public float G 
     { 
         get { return m_g; } 
         set { m_g = value; }
-    }
-
-    public float F
-    {
-        get
-        {
-            if(m_h < 0)
-                m_h = SearchGrid.Instance.CalcHeuristic(Pos, SearchGrid.Instance.EndNode.Pos);
-
-            return m_g + m_h;
-        }
     }
     #endregion
 
@@ -64,6 +67,7 @@ public class SearchNode : BaseNode
         m_g = float.MaxValue;
         m_h = -1;
         m_parent = null;
+        m_opened = m_closed = false;
 
         m_mat.color = Define.Cost2Color(m_cost);
         m_searchType = SearchType.None;
@@ -88,5 +92,13 @@ public class SearchNode : BaseNode
     {
         m_parent = parent;
         m_g = g;
+    }
+
+    public float F(float weight)
+    {
+        if (m_h < 0)
+            m_h = SearchGrid.Instance.CalcHeuristic(Pos, SearchGrid.Instance.EndNode.Pos, weight);
+
+        return m_g + m_h;
     }
 }

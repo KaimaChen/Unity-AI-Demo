@@ -153,8 +153,8 @@ MonoBehaviour:
   m_nodePrefab: {fileID: 1902866159556996, guid: 6ca41f8e1be07654cb5f54cca148faf8,
     type: 3}
   m_searchAlgo: 0
-  m_heuristicType: 0
-  m_diagonalMovement: 0
+  m_heuristicType: 2
+  m_diagonalMovement: 2
   m_showTime: 0.01
 --- !u!4 &212814570
 Transform:

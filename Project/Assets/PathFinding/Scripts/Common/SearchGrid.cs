@@ -6,6 +6,7 @@ public class SearchGrid : BaseGrid<SearchNode>
     public SearchAlgo m_searchAlgo;
     public HeuristicType m_heuristicType;
     public DiagonalMovement m_diagonalMovement;
+    public float m_weight = 1;
     public float m_showTime = 0.1f;
 
     private SearchNode m_startNode;
@@ -60,7 +61,13 @@ public class SearchGrid : BaseGrid<SearchNode>
         switch(m_searchAlgo)
         {
             case SearchAlgo.AStar:
-                algo = new AStar(m_startNode, m_endNode, m_nodes, m_diagonalMovement, m_showTime);
+                algo = new AStar(m_startNode, m_endNode, m_nodes, m_diagonalMovement, m_weight, m_showTime);
+                break;
+            case SearchAlgo.ThetaStar:
+                algo = new ThetaStar(m_startNode, m_endNode, m_nodes, m_diagonalMovement, m_weight, m_showTime);
+                break;
+            case SearchAlgo.BestFirstSearch:
+                algo = new BestFirstSearch(m_startNode, m_endNode, m_nodes, m_diagonalMovement, m_weight, m_showTime);
                 break;
             default:
                 Debug.LogError($"No code for SearchAlgo={m_searchAlgo}");
@@ -73,18 +80,18 @@ public class SearchGrid : BaseGrid<SearchNode>
             return null;
     }
 
-    public float CalcHeuristic(Vector2Int a, Vector2Int b)
+    public float CalcHeuristic(Vector2Int a, Vector2Int b, float weight)
     {
         switch (m_heuristicType)
         {
             case HeuristicType.Manhattan:
-                return Heuristic.Manhattan(a, b);
+                return Heuristic.Manhattan(a, b) * weight;
             case HeuristicType.Chebyshev:
-                return Heuristic.Chebyshev(a, b);
+                return Heuristic.Chebyshev(a, b) * weight;
             case HeuristicType.Octile:
-                return Heuristic.Octile(a, b);
+                return Heuristic.Octile(a, b) * weight;
             case HeuristicType.Euclidean:
-                return Heuristic.Euclidean(a, b);
+                return Heuristic.Euclidean(a, b) * weight;
             default:
                 Debug.LogError($"No code for HeuristicType={m_heuristicType}");
                 return 0;
