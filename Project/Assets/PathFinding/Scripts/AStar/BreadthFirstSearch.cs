@@ -8,8 +8,8 @@ public class BreadthFirstSearch : AStar
 {
     private readonly Queue<Vector2Int> m_openQueue = new Queue<Vector2Int>();
 
-    public BreadthFirstSearch(SearchNode start, SearchNode end, SearchNode[,] nodes, DiagonalMovement diagonal, float weight, float showTime)
-        : base(start, end, nodes, diagonal, weight, showTime)
+    public BreadthFirstSearch(SearchNode start, SearchNode end, SearchNode[,] nodes, float weight, float showTime)
+        : base(start, end, nodes, weight, showTime)
     { }
 
     protected override void AddOpenList(SearchNode node)

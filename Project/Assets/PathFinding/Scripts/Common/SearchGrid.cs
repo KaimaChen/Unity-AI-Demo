@@ -9,7 +9,6 @@ public class SearchGrid : BaseGrid<SearchNode>
 {
     public SearchAlgo m_searchAlgo;
     public HeuristicType m_heuristicType;
-    public DiagonalMovement m_diagonalMovement;
     public float m_weight = 1;
     public float m_showTime = 0.1f;
 
@@ -141,19 +140,22 @@ public class SearchGrid : BaseGrid<SearchNode>
         switch(m_searchAlgo)
         {
             case SearchAlgo.AStar:
-                algo = new AStar(m_startNode, m_endNode, m_nodes, m_diagonalMovement, m_weight, m_showTime);
+                algo = new AStar(m_startNode, m_endNode, m_nodes, m_weight, m_showTime);
                 break;
             case SearchAlgo.ThetaStar:
-                algo = new ThetaStar(m_startNode, m_endNode, m_nodes, m_diagonalMovement, m_weight, m_showTime);
+                algo = new ThetaStar(m_startNode, m_endNode, m_nodes, m_weight, m_showTime);
                 break;
             case SearchAlgo.BestFirstSearch:
-                algo = new BestFirstSearch(m_startNode, m_endNode, m_nodes, m_diagonalMovement, m_weight, m_showTime);
+                algo = new BestFirstSearch(m_startNode, m_endNode, m_nodes, m_weight, m_showTime);
                 break;
             case SearchAlgo.BreadthFirstSearch:
-                algo = new BreadthFirstSearch(m_startNode, m_endNode, m_nodes, m_diagonalMovement, m_weight, m_showTime);
+                algo = new BreadthFirstSearch(m_startNode, m_endNode, m_nodes, m_weight, m_showTime);
                 break;
             case SearchAlgo.DijkstraSearch:
-                algo = new DijkstraSearch(m_startNode, m_endNode, m_nodes, m_diagonalMovement, m_weight, m_showTime);
+                algo = new DijkstraSearch(m_startNode, m_endNode, m_nodes, m_weight, m_showTime);
+                break;
+            case SearchAlgo.JPS:
+                algo = new JumpPointSearch(m_startNode, m_endNode, m_nodes, m_weight, m_showTime);
                 break;
             default:
                 Debug.LogError($"No code for SearchAlgo={m_searchAlgo}");

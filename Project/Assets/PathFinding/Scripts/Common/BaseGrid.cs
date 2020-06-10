@@ -24,6 +24,7 @@ public abstract class BaseGrid<T> : MonoBehaviour where T : BaseNode
             for(int x = 0; x < m_col; x++)
             {
                 GameObject go = GameObject.Instantiate(m_nodePrefab);
+                go.name = $"node({x}, {y})";
                 go.transform.SetParent(transform);
                 go.transform.localPosition = new Vector3(x, y, 0);
 

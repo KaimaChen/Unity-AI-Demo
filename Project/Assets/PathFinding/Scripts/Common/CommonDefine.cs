@@ -74,12 +74,5 @@ public enum SearchAlgo
 	BreadthFirstSearch,
 	DijkstraSearch,
 	ThetaStar,
-}
-
-public enum DiagonalMovement
-{
-	Never,
-	Always,
-	IfAtMostOneObstacle,
-	OnlyWhenNoObstacles, //两边都没有障碍时才能走斜线
+	JPS,
 }

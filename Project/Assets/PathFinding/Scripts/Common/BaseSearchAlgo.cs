@@ -7,64 +7,38 @@ public abstract class BaseSearchAlgo
     protected readonly SearchNode m_start;
     protected readonly SearchNode m_end;
     protected readonly SearchNode[,] m_nodes;
-    private readonly DiagonalMovement m_diagonalMovement;
 
     protected readonly float m_showTime;
 
-    public BaseSearchAlgo(SearchNode start, SearchNode end, SearchNode[,] nodes, DiagonalMovement diagonal, float showTime)
+    public BaseSearchAlgo(SearchNode start, SearchNode end, SearchNode[,] nodes, float showTime)
     {
         m_start = start;
         m_end = end;
         m_nodes = nodes;
-        m_diagonalMovement = diagonal;
         m_showTime = showTime;
     }
 
     public abstract IEnumerator Process();
 
-    protected List<SearchNode> GetNeighbors(Vector2Int pos)
+    protected virtual List<SearchNode> GetNeighbors(SearchNode node)
     {
         List<SearchNode> result = new List<SearchNode>();
+        Vector2Int pos = node.Pos;
 
-        bool left = AddNeighbor(pos, -1, 0, result);
-        bool right = AddNeighbor(pos, 1, 0, result);
-        bool top = AddNeighbor(pos, 0, 1, result);
-        bool bottom = AddNeighbor(pos, 0, -1, result);
+        bool left = TryAddNeighbor(pos, -1, 0, result);
+        bool right = TryAddNeighbor(pos, 1, 0, result);
+        bool top = TryAddNeighbor(pos, 0, 1, result);
+        bool bottom = TryAddNeighbor(pos, 0, -1, result);
 
-        if(m_diagonalMovement == DiagonalMovement.Always)
-        {
-            AddNeighbor(pos, -1, 1, result);
-            AddNeighbor(pos, -1, -1, result);
-            AddNeighbor(pos, 1, -1, result);
-            AddNeighbor(pos, 1, 1, result);
-        }
-        else if(m_diagonalMovement == DiagonalMovement.IfAtMostOneObstacle)
-        {
-            if (left || top) AddNeighbor(pos, -1, 1, result);
-            if (left || bottom) AddNeighbor(pos, -1, -1, result);
-            if (right || bottom) AddNeighbor(pos, 1, -1, result);
-            if (right || top) AddNeighbor(pos, 1, 1, result);
-        }
-        else if(m_diagonalMovement == DiagonalMovement.OnlyWhenNoObstacles)
-        {
-            if (left && top) AddNeighbor(pos, -1, 1, result);
-            if (left && bottom) AddNeighbor(pos, -1, -1, result);
-            if (right && bottom) AddNeighbor(pos, 1, -1, result);
-            if (right && top) AddNeighbor(pos, 1, 1, result);
-        }
-        else if(m_diagonalMovement == DiagonalMovement.Never)
-        {
-            //do nothing
-        }
-        else
-        {
-            Debug.LogError($"node code for DiagonalMovement = {m_diagonalMovement}");
-        }
+        if (left || top) TryAddNeighbor(pos, -1, 1, result);
+        if (left || bottom) TryAddNeighbor(pos, -1, -1, result);
+        if (right || bottom) TryAddNeighbor(pos, 1, -1, result);
+        if (right || top) TryAddNeighbor(pos, 1, 1, result);
 
         return result;
     }
 
-    private bool AddNeighbor(Vector2Int curtPos, int dx, int dy, List<SearchNode> result)
+    protected bool TryAddNeighbor(Vector2Int curtPos, int dx, int dy, List<SearchNode> result)
     {
         int x = curtPos.x + dx;
         int y = curtPos.y + dy;
@@ -78,6 +52,12 @@ public abstract class BaseSearchAlgo
         {
             return false;
         }
+    }
+
+    protected bool IsWalkableAt(int x, int y)
+    {
+        SearchNode node = GetNode(x, y);
+        return node != null && !node.IsObstacle();
     }
 
     protected bool IsInside(int x, int y)

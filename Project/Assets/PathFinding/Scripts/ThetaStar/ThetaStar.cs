@@ -2,8 +2,8 @@
 
 public class ThetaStar : AStar
 {
-    public ThetaStar(SearchNode start, SearchNode end, SearchNode[,] nodes, DiagonalMovement diagonal, float weight, float showTime)
-        : base(start, end, nodes, diagonal, weight, showTime)
+    public ThetaStar(SearchNode start, SearchNode end, SearchNode[,] nodes, float weight, float showTime)
+        : base(start, end, nodes, weight, showTime)
     { }
 
     protected override void UpdateVertex(SearchNode curtNode, SearchNode neighbor)

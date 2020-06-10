@@ -12,8 +12,8 @@ public class AStar : BaseSearchAlgo
     private readonly float m_weight = 1;
     protected readonly List<Vector2Int> m_openList = new List<Vector2Int>();
 
-    public AStar(SearchNode start, SearchNode end, SearchNode[,] nodes, DiagonalMovement diagonal, float weight, float showTime)
-        : base(start, end, nodes, diagonal, showTime)
+    public AStar(SearchNode start, SearchNode end, SearchNode[,] nodes, float weight, float showTime)
+        : base(start, end, nodes, showTime)
     {
         m_weight = weight;
     }
@@ -41,7 +41,7 @@ public class AStar : BaseSearchAlgo
 
                 curtNode.Closed = true;
 
-                List<SearchNode> neighbors = GetNeighbors(curtPos);
+                List<SearchNode> neighbors = GetNeighbors(curtNode);
                 for (int i = 0; i < neighbors.Count; i++)
                 {
                     SearchNode neighbor = neighbors[i];
@@ -52,14 +52,19 @@ public class AStar : BaseSearchAlgo
         }
 
         //绘制出最终的路径
+        GeneratePath();
+
+        yield break;
+    }
+
+    protected void GeneratePath()
+    {
         SearchNode lastNode = GetNode(m_end.Pos);
         while (lastNode != null)
         {
             lastNode.SetSearchType(SearchType.Path, true);
             lastNode = lastNode.Parent;
         }
-
-        yield break;
     }
 
     protected virtual void UpdateVertex(SearchNode curtNode, SearchNode neighbor)
