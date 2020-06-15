@@ -94,14 +94,12 @@ public class JumpPointSearch : AStar
         }
         else if(dx != 0)
         {
-            if ((IsWalkableAt(x + dx, y + 1) && !IsWalkableAt(x, y + 1)) ||
-                (IsWalkableAt(x + dx, y - 1) && !IsWalkableAt(x, y - 1)))
+            if (CheckHorJumpPoint(x, y, dx))
                 return GetNode(x, y);
         }
         else if(dy != 0)
         {
-            if ((IsWalkableAt(x + 1, y + dy) && !IsWalkableAt(x + 1, y)) ||
-                (IsWalkableAt(x - 1, y + dy) && !IsWalkableAt(x - 1, y)))
+            if (CheckVerJumpPoints(x, y, dy))
                 return GetNode(x, y);
         }
 
@@ -164,5 +162,17 @@ public class JumpPointSearch : AStar
         {
             return base.GetNeighbors(node);
         }
+    }
+
+    protected bool CheckHorJumpPoint(int x, int y, int dx)
+    {
+        return ((IsWalkableAt(x + dx, y + 1) && !IsWalkableAt(x, y + 1)) ||
+                    (IsWalkableAt(x + dx, y - 1) && !IsWalkableAt(x, y - 1)));
+    }
+
+    protected bool CheckVerJumpPoints(int x, int y, int dy)
+    {
+        return ((IsWalkableAt(x + 1, y + dy) && !IsWalkableAt(x + 1, y)) ||
+                    (IsWalkableAt(x - 1, y + dy) && !IsWalkableAt(x - 1, y)));
     }
 }
