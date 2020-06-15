@@ -75,4 +75,5 @@ public enum SearchAlgo
 	DijkstraSearch,
 	ThetaStar,
 	JPS,
+	JPSPlus,
 }

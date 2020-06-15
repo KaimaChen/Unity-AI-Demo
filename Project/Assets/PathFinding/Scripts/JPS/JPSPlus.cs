@@ -52,6 +52,13 @@ public class JPSPlus : JumpPointSearch
 
         //处理Diagonal Jump Points
         //TODO
+
+
+        #region 展示部分
+        for (int y = 0; y < m_distanceData.GetLength(0); y++)
+            for (int x = 0; x < m_distanceData.GetLength(1); x++)
+                m_nodes[y, x].ShowDistance(m_distanceData[y, x, c_east], m_distanceData[y, x, c_west], m_distanceData[y, x, c_north], m_distanceData[y, x, c_south]);
+        #endregion
     }
 
     private void ClearDistanceData()
@@ -118,6 +125,8 @@ public class JPSPlus : JumpPointSearch
                     continue;
                 }
 
+                count++;
+
                 if (isJumpPointLastSeen)
                     m_distanceData[y, x, dir] = count;
                 else
@@ -157,6 +166,8 @@ public class JPSPlus : JumpPointSearch
                     continue;
                 }
 
+                count++;
+
                 if (isJumpPointLastSeen)
                     m_distanceData[y, x, dir] = count;
                 else
@@ -171,14 +182,14 @@ public class JPSPlus : JumpPointSearch
         }
     }
 
-    private void InitWestStraightJumpPoints(bool[,,] isJumpPoints)
-    {
-        InitHorStraightJumpPoints(isJumpPoints, true);
-    }
-
     private void InitEastStraightJumpPoints(bool[,,] isJumpPoints)
     {
         InitHorStraightJumpPoints(isJumpPoints, false);
+    }
+
+    private void InitWestStraightJumpPoints(bool[,,] isJumpPoints)
+    {
+        InitHorStraightJumpPoints(isJumpPoints, true);
     }
 
     private void InitNorthStraightJumpPoints(bool[,,] isJumpPoints)

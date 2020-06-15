@@ -12,7 +12,14 @@ public class SearchNode : BaseNode
 
     private MeshRenderer m_renderer;
     private Material m_mat;
-    
+
+    #region JPSPlus
+    private TextMesh m_JPSPlusEast;
+    private TextMesh m_JPSPlusWest;
+    private TextMesh m_JPSPlusNorth;
+    private TextMesh m_JPSPlusSouth;
+    #endregion
+
     #region get-set
     public SearchNode Parent
     {
@@ -60,6 +67,16 @@ public class SearchNode : BaseNode
         m_renderer = GetComponent<MeshRenderer>();
         m_mat = m_renderer.material;
         m_mat.color = Define.Cost2Color(cost);
+
+        Transform jpsPlus = transform.Find("JPSPlus");
+        m_JPSPlusEast = jpsPlus.Find("JPSEast").GetComponent<TextMesh>();
+        m_JPSPlusEast.gameObject.SetActive(false);
+        m_JPSPlusWest = jpsPlus.Find("JPSWest").GetComponent<TextMesh>();
+        m_JPSPlusWest.gameObject.SetActive(false);
+        m_JPSPlusNorth = jpsPlus.Find("JPSNorth").GetComponent<TextMesh>();
+        m_JPSPlusNorth.gameObject.SetActive(false);
+        m_JPSPlusSouth = jpsPlus.Find("JPSSouth").GetComponent<TextMesh>();
+        m_JPSPlusSouth.gameObject.SetActive(false);
     }
 
     public void Reset()
@@ -101,4 +118,21 @@ public class SearchNode : BaseNode
 
         return m_g + m_h;
     }
+
+    #region JPSPlus
+    public void ShowDistance(int east, int west, int north, int south)
+    {
+        m_JPSPlusEast.gameObject.SetActive(true);
+        m_JPSPlusEast.text = east.ToString();
+
+        m_JPSPlusWest.gameObject.SetActive(true);
+        m_JPSPlusWest.text = west.ToString();
+
+        m_JPSPlusNorth.gameObject.SetActive(true);
+        m_JPSPlusNorth.text = north.ToString();
+
+        m_JPSPlusSouth.gameObject.SetActive(true);
+        m_JPSPlusSouth.text = south.ToString();
+    }
+    #endregion
 }

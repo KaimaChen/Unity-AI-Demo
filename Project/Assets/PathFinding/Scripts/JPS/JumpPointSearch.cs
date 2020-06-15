@@ -166,12 +166,18 @@ public class JumpPointSearch : AStar
 
     protected bool CheckHorJumpPoint(int x, int y, int dx)
     {
+        if (!IsWalkableAt(x, y))
+            return false;
+
         return ((IsWalkableAt(x + dx, y + 1) && !IsWalkableAt(x, y + 1)) ||
                     (IsWalkableAt(x + dx, y - 1) && !IsWalkableAt(x, y - 1)));
     }
 
     protected bool CheckVerJumpPoints(int x, int y, int dy)
     {
+        if (!IsWalkableAt(x, y))
+            return false;
+
         return ((IsWalkableAt(x + 1, y + dy) && !IsWalkableAt(x + 1, y)) ||
                     (IsWalkableAt(x - 1, y + dy) && !IsWalkableAt(x - 1, y)));
     }
