@@ -7,6 +7,8 @@ public abstract class BaseSearchAlgo
     protected readonly SearchNode m_start;
     protected readonly SearchNode m_end;
     protected readonly SearchNode[,] m_nodes;
+    protected readonly int m_mapWidth;
+    protected readonly int m_mapHeight;
 
     protected readonly float m_showTime;
 
@@ -16,6 +18,9 @@ public abstract class BaseSearchAlgo
         m_end = end;
         m_nodes = nodes;
         m_showTime = showTime;
+
+        m_mapHeight = nodes.GetLength(0);
+        m_mapWidth = nodes.GetLength(1);
     }
 
     public abstract IEnumerator Process();

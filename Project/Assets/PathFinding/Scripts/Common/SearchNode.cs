@@ -18,6 +18,10 @@ public class SearchNode : BaseNode
     private TextMesh m_JPSPlusWest;
     private TextMesh m_JPSPlusNorth;
     private TextMesh m_JPSPlusSouth;
+    private TextMesh m_JPSPlusNorthEast;
+    private TextMesh m_JPSPlusNorthWest;
+    private TextMesh m_JPSPlusSouthEast;
+    private TextMesh m_JPSPlusSouthWest;
     #endregion
 
     #region get-set
@@ -77,6 +81,14 @@ public class SearchNode : BaseNode
         m_JPSPlusNorth.gameObject.SetActive(false);
         m_JPSPlusSouth = jpsPlus.Find("JPSSouth").GetComponent<TextMesh>();
         m_JPSPlusSouth.gameObject.SetActive(false);
+        m_JPSPlusNorthEast = jpsPlus.Find("JPSNorthEast").GetComponent<TextMesh>();
+        m_JPSPlusNorthEast.gameObject.SetActive(false);
+        m_JPSPlusNorthWest = jpsPlus.Find("JPSNorthWest").GetComponent<TextMesh>();
+        m_JPSPlusNorthWest.gameObject.SetActive(false);
+        m_JPSPlusSouthEast = jpsPlus.Find("JPSSouthEast").GetComponent<TextMesh>();
+        m_JPSPlusSouthEast.gameObject.SetActive(false);
+        m_JPSPlusSouthWest = jpsPlus.Find("JPSSouthWest").GetComponent<TextMesh>();
+        m_JPSPlusSouthWest.gameObject.SetActive(false);
     }
 
     public void Reset()
@@ -120,19 +132,42 @@ public class SearchNode : BaseNode
     }
 
     #region JPSPlus
-    public void ShowDistance(int east, int west, int north, int south)
+    public void ShowDistance(int east, int west, int north, int south, int northEast, int northWest, int southEast, int southWest)
     {
+        Color positiveColor = new Color(0, 0.8f, 0); 
+        Color otherColor = Color.black;
+
         m_JPSPlusEast.gameObject.SetActive(true);
         m_JPSPlusEast.text = east.ToString();
+        m_JPSPlusEast.color = east > 0 ? positiveColor : otherColor;
 
         m_JPSPlusWest.gameObject.SetActive(true);
         m_JPSPlusWest.text = west.ToString();
+        m_JPSPlusWest.color = west > 0 ? positiveColor : otherColor;
 
         m_JPSPlusNorth.gameObject.SetActive(true);
         m_JPSPlusNorth.text = north.ToString();
+        m_JPSPlusNorth.color = north > 0 ? positiveColor : otherColor;
 
         m_JPSPlusSouth.gameObject.SetActive(true);
         m_JPSPlusSouth.text = south.ToString();
+        m_JPSPlusSouth.color = south > 0 ? positiveColor : otherColor;
+
+        m_JPSPlusNorthEast.gameObject.SetActive(true);
+        m_JPSPlusNorthEast.text = northEast.ToString();
+        m_JPSPlusNorthEast.color = northEast > 0 ? positiveColor : otherColor;
+
+        m_JPSPlusNorthWest.gameObject.SetActive(true);
+        m_JPSPlusNorthWest.text = northWest.ToString();
+        m_JPSPlusNorthWest.color = northWest > 0 ? positiveColor : otherColor;
+
+        m_JPSPlusSouthEast.gameObject.SetActive(true);
+        m_JPSPlusSouthEast.text = southEast.ToString();
+        m_JPSPlusSouthEast.color = southEast > 0 ? positiveColor : otherColor;
+
+        m_JPSPlusSouthWest.gameObject.SetActive(true);
+        m_JPSPlusSouthWest.text = southWest.ToString();
+        m_JPSPlusSouthWest.color = southWest > 0 ? positiveColor : otherColor;
     }
     #endregion
 }

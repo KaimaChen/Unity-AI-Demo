@@ -51,13 +51,18 @@ public class JPSPlus : JumpPointSearch
         InitSouthStraightJumpPoints(isJumpPoints);
 
         //处理Diagonal Jump Points
-        //TODO
-
+        InitSouthWestJumpPoints(isJumpPoints);
+        InitSouthEastJumpPoints(isJumpPoints);
+        InitNorthWestJumpPoints(isJumpPoints);
+        InitNorthEastJumpPoints(isJumpPoints);
 
         #region 展示部分
         for (int y = 0; y < m_distanceData.GetLength(0); y++)
             for (int x = 0; x < m_distanceData.GetLength(1); x++)
-                m_nodes[y, x].ShowDistance(m_distanceData[y, x, c_east], m_distanceData[y, x, c_west], m_distanceData[y, x, c_north], m_distanceData[y, x, c_south]);
+                m_nodes[y, x].ShowDistance(m_distanceData[y, x, c_east], m_distanceData[y, x, c_west], 
+                                                                m_distanceData[y, x, c_north], m_distanceData[y, x, c_south],
+                                                                m_distanceData[y, x, c_northEast], m_distanceData[y, x, c_northWest],
+                                                                m_distanceData[y, x, c_southEast], m_distanceData[y, x, c_southWest]);
         #endregion
     }
 
@@ -201,4 +206,134 @@ public class JPSPlus : JumpPointSearch
     {
         InitVerStraightJumpPoints(isJumpPoints, true);
     }
+
+    #region Diagonal Jump Points
+    private void InitSouthWestJumpPoints(bool[,,] isJumpPoints)
+    {
+        for(int y = 0; y < m_mapHeight; y++)
+        {
+            for(int x = 0; x < m_mapWidth; x++)
+            {
+                if (!IsWalkableAt(x, y))
+                    continue;
+
+                if(x == 0 || y == 0 || !IsWalkableAt(x - 1, y) || !IsWalkableAt(x, y - 1) || !IsWalkableAt(x - 1, y - 1))
+                {
+                    m_distanceData[y, x, c_southWest] = 0;
+                }
+                else if(IsWalkableAt(x - 1, y) && IsWalkableAt(x, y - 1) && 
+                            (m_distanceData[y - 1, x - 1, c_south] > 0 || m_distanceData[y - 1, x - 1, c_west] > 0))
+                {
+                    //Straight jump point one away
+                    m_distanceData[y, x, c_southWest] = 1;
+                }
+                else
+                {
+                    //Increment from last
+                    int jumpDistance = m_distanceData[y - 1, x - 1, c_southWest];
+                    if (jumpDistance > 0)
+                        m_distanceData[y, x, c_southWest] = 1 + jumpDistance;
+                    else
+                        m_distanceData[y, x, c_southWest] = -1 + jumpDistance;
+                }
+            }
+        }
+    }
+
+    private void InitNorthWestJumpPoints(bool[,,] isJumpPoints)
+    {
+        for (int y = m_mapHeight - 1; y >= 0; y--)
+        {
+            for (int x = 0; x < m_mapWidth; x++)
+            {
+                if (!IsWalkableAt(x, y))
+                    continue;
+
+                if (x == 0 || y == m_mapHeight - 1 || !IsWalkableAt(x - 1, y) || !IsWalkableAt(x, y + 1) || !IsWalkableAt(x - 1, y + 1))
+                {
+                    m_distanceData[y, x, c_northWest] = 0;
+                }
+                else if (IsWalkableAt(x - 1, y) && IsWalkableAt(x, y + 1) &&
+                            (m_distanceData[y + 1, x - 1, c_north] > 0 || m_distanceData[y + 1, x - 1, c_west] > 0))
+                {
+                    //Straight jump point one away
+                    m_distanceData[y, x, c_northWest] = 1;
+                }
+                else
+                {
+                    //Increment from last
+                    int jumpDistance = m_distanceData[y + 1, x - 1, c_northWest];
+                    if (jumpDistance > 0)
+                        m_distanceData[y, x, c_northWest] = 1 + jumpDistance;
+                    else
+                        m_distanceData[y, x, c_northWest] = -1 + jumpDistance;
+                }
+            }
+        }
+    }
+
+    private void InitSouthEastJumpPoints(bool[,,] isJumpPoints)
+    {
+        for (int y = 0; y < m_mapHeight; y++)
+        {
+            for (int x = m_mapWidth - 1; x >= 0; x--)
+            {
+                if (!IsWalkableAt(x, y))
+                    continue;
+
+                if (x == m_mapWidth - 1 || y == 0 || !IsWalkableAt(x + 1, y) || !IsWalkableAt(x, y - 1) || !IsWalkableAt(x + 1, y - 1))
+                {
+                    m_distanceData[y, x, c_southEast] = 0;
+                }
+                else if (IsWalkableAt(x + 1, y) && IsWalkableAt(x, y - 1) &&
+                            (m_distanceData[y - 1, x + 1, c_south] > 0 || m_distanceData[y - 1, x + 1, c_east] > 0))
+                {
+                    //Straight jump point one away
+                    m_distanceData[y, x, c_southEast] = 1;
+                }
+                else
+                {
+                    //Increment from last
+                    int jumpDistance = m_distanceData[y - 1, x + 1, c_southEast];
+                    if (jumpDistance > 0)
+                        m_distanceData[y, x, c_southEast] = 1 + jumpDistance;
+                    else
+                        m_distanceData[y, x, c_southEast] = -1 + jumpDistance;
+                }
+            }
+        }
+    }
+
+    private void InitNorthEastJumpPoints(bool[,,] isJumpPoints)
+    {
+        for (int y = m_mapHeight - 1; y >= 0; y--)
+        {
+            for (int x = m_mapWidth - 1; x >= 0; x--)
+            {
+                if (!IsWalkableAt(x, y))
+                    continue;
+
+                if (x == m_mapWidth - 1 || y == m_mapHeight - 1 || !IsWalkableAt(x + 1, y) || !IsWalkableAt(x, y + 1) || !IsWalkableAt(x + 1, y + 1))
+                {
+                    m_distanceData[y, x, c_northEast] = 0;
+                }
+                else if (IsWalkableAt(x + 1, y) && IsWalkableAt(x, y + 1) &&
+                            (m_distanceData[y + 1, x + 1, c_north] > 0 || m_distanceData[y + 1, x + 1, c_east] > 0))
+                {
+                    //Straight jump point one away
+                    m_distanceData[y, x, c_northEast] = 1;
+                }
+                else
+                {
+                    //Increment from last
+                    int jumpDistance = m_distanceData[y + 1, x + 1, c_northEast];
+                    if (jumpDistance > 0)
+                        m_distanceData[y, x, c_northEast] = 1 + jumpDistance;
+                    else
+                        m_distanceData[y, x, c_northEast] = -1 + jumpDistance;
+                }
+            }
+        }
+    }
+    #endregion
 }
