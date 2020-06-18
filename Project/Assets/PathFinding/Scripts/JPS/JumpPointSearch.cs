@@ -45,7 +45,7 @@ public class JumpPointSearch : AStar
 
     private void IdentifySuccessors(SearchNode node)
     {
-        List<SearchNode> neighbors = GetNeighbors(node);
+        List<SearchNode> neighbors = PruneNeighbors(node);
         for(int i = 0; i < neighbors.Count; i++)
         {
             var neighbor = neighbors[i];
@@ -109,7 +109,7 @@ public class JumpPointSearch : AStar
             return null;
     }
 
-    protected override List<SearchNode> GetNeighbors(SearchNode node)
+    private List<SearchNode> PruneNeighbors(SearchNode node)
     {
         var parent = node.Parent;
         if(parent != null) //找到natural neighbors和forced neighbors

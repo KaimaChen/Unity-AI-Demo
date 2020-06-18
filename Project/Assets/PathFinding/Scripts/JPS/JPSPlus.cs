@@ -31,9 +31,236 @@ public class JPSPlus : JumpPointSearch
         //预处理是离线了，放到这里只是为了方便看结果
         OfflinePreprocess();
 
+        //运行时
+        int[][] dirLookUpTable = new int[c_dirCount][];
+        dirLookUpTable[c_east] = new int[3] { c_east, c_northEast, c_southEast };
+        dirLookUpTable[c_west] = new int[3] { c_west, c_northWest, c_southWest };
+        dirLookUpTable[c_north] = new int[3] { c_north, c_northEast, c_northWest };
+        dirLookUpTable[c_south] = new int[3] { c_south, c_southEast, c_southWest };
+        dirLookUpTable[c_northEast] = new int[3] { c_northEast, c_north, c_east };
+        dirLookUpTable[c_northWest] = new int[3] { c_northWest, c_north, c_west };
+        dirLookUpTable[c_southEast] = new int[3] { c_southEast, c_south, c_east };
+        dirLookUpTable[c_southWest] = new int[3] { c_southWest, c_south, c_west };
+
+        m_start.G = 0;
+        AddOpenList(m_start);
+        while(OpenListSize() > 0)
+        {
+            Vector2Int curtPos = PopOpenList();
+            SearchNode curtNode = GetNode(curtPos);
+            curtNode.Closed = true;
+
+            if(curtPos == m_end.Pos)
+                break;
+
+            #region 展示
+            Debug.Log("Open List Count = " + OpenListSize());
+            yield return new WaitForSeconds(m_showTime); //等待一点时间，以便观察
+            curtNode.SetSearchType(SearchType.Expanded, true);
+            #endregion
+
+            SearchNode parent = curtNode.Parent;
+            if(parent != null)
+            {
+                int[] dirArr = dirLookUpTable[CalcDir(parent, curtNode)];
+                for(int i = 0; i < dirArr.Length; i++)
+                {
+                    int dir = dirArr[i];
+                    SearchNode newSuccessor = null;
+                    float givenCost = float.MaxValue;
+
+                    if(IsCardinal(dir) && IsTargetInExactDir(curtNode, dir) &&
+                        DiffNodes(curtNode, m_end) <= Mathf.Abs(Distance(curtNode, dir)))
+                    {
+                        //目标比障碍或跳点更近
+                        newSuccessor = m_end;
+                        givenCost = curtNode.G + DiffNodes(curtNode, m_end);
+                    }
+                    else if(IsDiagonal(dir) && IsTargetInGeneralDir(curtNode, dir) &&
+                                (DiffNodesRow(curtNode, m_end) <= Mathf.Abs(Distance(curtNode, dir)) ||
+                                DiffNodesCol(curtNode, m_end) <= Mathf.Abs(Distance(curtNode, dir))))
+                    {
+                        //目标在水平或竖直方向上比障碍或跳点更近
+                        int minDiff = Mathf.Min(RowDiff(curtNode, m_end), ColDiff(curtNode, m_end));
+                        newSuccessor = GetNodeInDir(curtNode, minDiff, dir);
+                        givenCost = curtNode.G + (Define.c_sqrt2 * minDiff);
+                    }
+                    else if(Distance(curtNode, dir) > 0)
+                    {
+                        newSuccessor = GetNodeInDir(curtNode, Distance(curtNode, dir), dir);
+                        givenCost = DiffNodes(curtNode, newSuccessor);
+                        if (IsDiagonal(dir))
+                            givenCost *= Define.c_sqrt2;
+                        givenCost += curtNode.G;
+                    }
+
+                    if(newSuccessor != null)
+                    {
+                        if(!newSuccessor.Opened && !newSuccessor.Closed)
+                        {
+                            newSuccessor.SetParent(curtNode, givenCost);
+                            AddOpenList(newSuccessor);
+                        }
+                        else if(givenCost < newSuccessor.G)
+                        {
+                            newSuccessor.SetParent(curtNode, givenCost);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                List<SearchNode> neighbors = GetNeighbors(curtNode);
+                for(int i = 0; i < neighbors.Count; i++)
+                {
+                    var neighbor = neighbors[i];
+                    if (neighbor.Closed == false)
+                        UpdateVertex(curtNode, neighbor);
+                }
+            }
+        }
+
+        GeneratePath();
+
         yield break;
     }
 
+    private int CalcDir(SearchNode prev, SearchNode curt)
+    {
+        int dx = curt.X - prev.X;
+        int dy = curt.Y - prev.Y;
+        if(dy == 0)
+        {
+            return dx > 0 ? c_east : c_west;
+        }
+        else if(dx == 0)
+        {
+            return dy > 0 ? c_north : c_south;
+        }
+        else
+        {
+            if (dx > 0 && dy > 0)
+                return c_northEast;
+            else if (dx < 0 && dy > 0)
+                return c_northWest;
+            else if (dx > 0 && dy < 0)
+                return c_southEast;
+            else
+                return c_southWest;
+        }
+    }
+
+    private bool IsCardinal(int dir)
+    {
+        return dir == c_east || dir == c_west || dir == c_south || dir == c_north;
+    }
+
+    private bool IsDiagonal(int dir)
+    {
+        return dir == c_northEast || dir == c_northWest || dir == c_southEast || dir == c_southWest;
+    }
+
+    private bool IsTargetInExactDir(SearchNode curtNode, int dir)
+    {
+        int targetDir = CalcDir(curtNode, m_end);
+        return targetDir == dir;
+    }
+
+    private bool IsTargetInGeneralDir(SearchNode curtNode, int dir)
+    {
+        int dx = m_end.X - curtNode.X;
+        int dy = m_end.Y - curtNode.Y;
+
+        if (dir == c_northEast)
+            return (dx >= 0 && dy >= 0);
+        else if (dir == c_northWest)
+            return (dx <= 0 && dy >= 0);
+        else if (dir == c_southEast)
+            return (dx >= 0 && dy <= 0);
+        else if (dir == c_southWest)
+            return (dx <= 0 && dy <= 0);
+        else
+            return false;
+    }
+
+    private int DiffNodes(SearchNode n1, SearchNode n2)
+    {
+        int dx = Mathf.Abs(n1.X - n2.X);
+        int dy = Mathf.Abs(n1.Y - n2.Y);
+        return Mathf.Max(dx, dy);
+    }
+
+    private int DiffNodesRow(SearchNode n1, SearchNode n2)
+    {
+        return Mathf.Abs(n1.Y - n2.Y);
+    }
+
+    private int DiffNodesCol(SearchNode n1, SearchNode n2)
+    {
+        return Mathf.Abs(n1.X - n2.X);
+    }
+
+    private int RowDiff(SearchNode prev, SearchNode curt)
+    {
+        return curt.Y - prev.Y;
+    }
+
+    private int ColDiff(SearchNode prev, SearchNode curt)
+    {
+        return curt.X - prev.X;
+    }
+
+    private SearchNode GetNodeInDir(SearchNode node, int distance, int dir)
+    {
+        int x = node.X;
+        int y = node.Y;
+
+        if(dir == c_east)
+        {
+            x += distance;
+        }
+        else if(dir == c_west)
+        {
+            x -= distance;
+        }
+        else if(dir == c_north)
+        {
+            y += distance;
+        }
+        else if(dir == c_south)
+        {
+            y -= distance;
+        }
+        else if(dir == c_northEast)
+        {
+            x += distance;
+            y += distance;
+        }
+        else if(dir == c_northWest)
+        {
+            x -= distance;
+            y += distance;
+        }
+        else if(dir == c_southEast)
+        {
+            x += distance;
+            y -= distance;
+        }
+        else if(dir == c_southWest)
+        {
+            x -= distance;
+            y -= distance;
+        }
+
+        return GetNode(x, y);
+    }
+
+    private int Distance(SearchNode node, int dir)
+    {
+        return m_distanceData[node.Y, node.X, dir];
+    }
+
+    #region 预处理
     /// <summary>
     /// 离线进行的地图预处理操作
     /// </summary>
@@ -51,10 +278,10 @@ public class JPSPlus : JumpPointSearch
         InitSouthStraightJumpPoints(isJumpPoints);
 
         //处理Diagonal Jump Points
-        InitSouthWestJumpPoints(isJumpPoints);
-        InitSouthEastJumpPoints(isJumpPoints);
-        InitNorthWestJumpPoints(isJumpPoints);
-        InitNorthEastJumpPoints(isJumpPoints);
+        InitSouthWestJumpPoints();
+        InitSouthEastJumpPoints();
+        InitNorthWestJumpPoints();
+        InitNorthEastJumpPoints();
 
         #region 展示部分
         for (int y = 0; y < m_distanceData.GetLength(0); y++)
@@ -76,29 +303,27 @@ public class JPSPlus : JumpPointSearch
 
     private bool[,,] FindPrimaryJumpPoints()
     {
-        int rowCount = m_distanceData.GetLength(0);
-        int colCount = m_distanceData.GetLength(1);
-        bool[,,] isJumpPoints = new bool[rowCount, colCount, c_dirCount];
+        bool[,,] isJumpPoints = new bool[m_mapHeight, m_mapWidth, c_dirCount];
 
-        for(int y = 0; y < rowCount; y++)
+        for(int y = 0; y < m_mapHeight; y++)
         {
             //朝东
-            for (int x = 0; x < colCount; x++)
+            for (int x = 0; x < m_mapWidth; x++)
                 isJumpPoints[y, x, c_east] = CheckHorJumpPoint(x, y, 1);
 
             //朝西
-            for (int x = colCount - 1; x >= 0; x--)
+            for (int x = m_mapWidth - 1; x >= 0; x--)
                 isJumpPoints[y, x, c_west] = CheckHorJumpPoint(x, y, -1);
         }
 
-        for(int x = 0; x < colCount; x++)
+        for(int x = 0; x < m_mapWidth; x++)
         {
             //朝北
-            for (int y = 0; y < rowCount; y++)
+            for (int y = 0; y < m_mapHeight; y++)
                 isJumpPoints[y, x, c_north] = CheckVerJumpPoints(x, y, 1);
 
             //朝南
-            for (int y = rowCount - 1; y >= 0; y--)
+            for (int y = m_mapHeight - 1; y >= 0; y--)
                 isJumpPoints[y, x, c_south] = CheckVerJumpPoints(x, y, -1);
         }
 
@@ -208,7 +433,7 @@ public class JPSPlus : JumpPointSearch
     }
 
     #region Diagonal Jump Points
-    private void InitSouthWestJumpPoints(bool[,,] isJumpPoints)
+    private void InitSouthWestJumpPoints()
     {
         for(int y = 0; y < m_mapHeight; y++)
         {
@@ -217,11 +442,11 @@ public class JPSPlus : JumpPointSearch
                 if (!IsWalkableAt(x, y))
                     continue;
 
-                if(x == 0 || y == 0 || !IsWalkableAt(x - 1, y) || !IsWalkableAt(x, y - 1) || !IsWalkableAt(x - 1, y - 1))
+                if(x == 0 || y == 0 || !IsWalkableAt(x - 1, y - 1) || (!IsWalkableAt(x - 1, y) && !IsWalkableAt(x, y - 1)))
                 {
                     m_distanceData[y, x, c_southWest] = 0;
                 }
-                else if(IsWalkableAt(x - 1, y) && IsWalkableAt(x, y - 1) && 
+                else if((IsWalkableAt(x - 1, y) || IsWalkableAt(x, y - 1)) && 
                             (m_distanceData[y - 1, x - 1, c_south] > 0 || m_distanceData[y - 1, x - 1, c_west] > 0))
                 {
                     //Straight jump point one away
@@ -240,7 +465,7 @@ public class JPSPlus : JumpPointSearch
         }
     }
 
-    private void InitNorthWestJumpPoints(bool[,,] isJumpPoints)
+    private void InitNorthWestJumpPoints()
     {
         for (int y = m_mapHeight - 1; y >= 0; y--)
         {
@@ -249,11 +474,11 @@ public class JPSPlus : JumpPointSearch
                 if (!IsWalkableAt(x, y))
                     continue;
 
-                if (x == 0 || y == m_mapHeight - 1 || !IsWalkableAt(x - 1, y) || !IsWalkableAt(x, y + 1) || !IsWalkableAt(x - 1, y + 1))
+                if (x == 0 || y == m_mapHeight - 1 || !IsWalkableAt(x - 1, y + 1) || (!IsWalkableAt(x - 1, y) && !IsWalkableAt(x, y + 1)))
                 {
                     m_distanceData[y, x, c_northWest] = 0;
                 }
-                else if (IsWalkableAt(x - 1, y) && IsWalkableAt(x, y + 1) &&
+                else if ((IsWalkableAt(x - 1, y) || IsWalkableAt(x, y + 1)) &&
                             (m_distanceData[y + 1, x - 1, c_north] > 0 || m_distanceData[y + 1, x - 1, c_west] > 0))
                 {
                     //Straight jump point one away
@@ -272,7 +497,7 @@ public class JPSPlus : JumpPointSearch
         }
     }
 
-    private void InitSouthEastJumpPoints(bool[,,] isJumpPoints)
+    private void InitSouthEastJumpPoints()
     {
         for (int y = 0; y < m_mapHeight; y++)
         {
@@ -281,11 +506,11 @@ public class JPSPlus : JumpPointSearch
                 if (!IsWalkableAt(x, y))
                     continue;
 
-                if (x == m_mapWidth - 1 || y == 0 || !IsWalkableAt(x + 1, y) || !IsWalkableAt(x, y - 1) || !IsWalkableAt(x + 1, y - 1))
+                if (x == m_mapWidth - 1 || y == 0 || !IsWalkableAt(x + 1, y - 1) || (!IsWalkableAt(x + 1, y) && !IsWalkableAt(x, y - 1)))
                 {
                     m_distanceData[y, x, c_southEast] = 0;
                 }
-                else if (IsWalkableAt(x + 1, y) && IsWalkableAt(x, y - 1) &&
+                else if ((IsWalkableAt(x + 1, y) || IsWalkableAt(x, y - 1)) &&
                             (m_distanceData[y - 1, x + 1, c_south] > 0 || m_distanceData[y - 1, x + 1, c_east] > 0))
                 {
                     //Straight jump point one away
@@ -304,7 +529,7 @@ public class JPSPlus : JumpPointSearch
         }
     }
 
-    private void InitNorthEastJumpPoints(bool[,,] isJumpPoints)
+    private void InitNorthEastJumpPoints()
     {
         for (int y = m_mapHeight - 1; y >= 0; y--)
         {
@@ -313,11 +538,11 @@ public class JPSPlus : JumpPointSearch
                 if (!IsWalkableAt(x, y))
                     continue;
 
-                if (x == m_mapWidth - 1 || y == m_mapHeight - 1 || !IsWalkableAt(x + 1, y) || !IsWalkableAt(x, y + 1) || !IsWalkableAt(x + 1, y + 1))
+                if (x == m_mapWidth - 1 || y == m_mapHeight - 1 || !IsWalkableAt(x + 1, y + 1) || (!IsWalkableAt(x + 1, y) && !IsWalkableAt(x, y + 1)))
                 {
                     m_distanceData[y, x, c_northEast] = 0;
                 }
-                else if (IsWalkableAt(x + 1, y) && IsWalkableAt(x, y + 1) &&
+                else if ((IsWalkableAt(x + 1, y) || IsWalkableAt(x, y + 1)) &&
                             (m_distanceData[y + 1, x + 1, c_north] > 0 || m_distanceData[y + 1, x + 1, c_east] > 0))
                 {
                     //Straight jump point one away
@@ -335,5 +560,6 @@ public class JPSPlus : JumpPointSearch
             }
         }
     }
+    #endregion
     #endregion
 }
