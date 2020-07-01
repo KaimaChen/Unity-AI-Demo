@@ -12,7 +12,7 @@ public class BreadthFirstSearch : AStar
         : base(start, end, nodes, weight, showTime)
     { }
 
-    protected override void AddOpenList(SearchNode node)
+    protected override void AddToOpenList(SearchNode node)
     {
         m_openQueue.Enqueue(node.Pos);
         node.Opened = true;

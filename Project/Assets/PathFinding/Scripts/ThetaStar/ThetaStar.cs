@@ -6,34 +6,29 @@ public class ThetaStar : AStar
         : base(start, end, nodes, weight, showTime)
     { }
 
-    protected override void UpdateVertex(SearchNode curtNode, SearchNode neighbor)
+    protected override void ComputeCost(SearchNode curtNode, SearchNode nextNode)
     {
-        if (curtNode.Parent != null && LineOfSign(curtNode.Parent.Pos, neighbor.Pos))
+        if(LineOfSign(curtNode.Parent, nextNode))
         {
-            float oldG = neighbor.G;
-            float newG = curtNode.Parent.G + CalcG(curtNode.Parent, neighbor);
-            if (!neighbor.Opened || newG < oldG)
-                neighbor.SetParent(curtNode.Parent, newG);
+            //Path 2
+            float newG = curtNode.Parent.G + CalcG(curtNode.Parent, nextNode);
+            if (newG < nextNode.G)
+                nextNode.SetParent(curtNode.Parent, newG);
         }
         else
         {
-            float oldG = neighbor.G;
-            float newG = curtNode.G + CalcG(curtNode, neighbor);
-            if (!neighbor.Opened || newG < oldG)
-                neighbor.SetParent(curtNode, newG);
-        }
-
-        if (!neighbor.Opened)
-        {
-            m_openList.Add(neighbor.Pos);
-            neighbor.Opened = true;
-
-            neighbor.SetSearchType(SearchType.Open, true);
+            //Path 1
+            base.ComputeCost(curtNode, nextNode);
         }
     }
 
-    private bool LineOfSign(Vector2Int start, Vector2Int end)
-    {   
+    protected bool LineOfSign(SearchNode startNode, SearchNode endNode)
+    {
+        if (startNode == null || endNode == null)
+            return false;
+
+        Vector2Int start = startNode.Pos;
+        Vector2Int end = endNode.Pos;
         int dx = end.x - start.x;
         int dy = end.y - start.y;
         int ux = dx > 0 ? 1 : -1;

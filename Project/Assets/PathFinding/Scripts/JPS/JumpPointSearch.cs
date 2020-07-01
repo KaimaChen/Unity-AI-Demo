@@ -14,7 +14,7 @@ public class JumpPointSearch : AStar
     {
         m_start.G = 0;
 
-        AddOpenList(m_start);
+        AddToOpenList(m_start);
         while(OpenListSize() > 0)
         {
             Vector2Int curtPos = PopOpenList();
@@ -61,7 +61,7 @@ public class JumpPointSearch : AStar
                 jumpPoint.SetParent(node, ng);
 
                 if(!jumpPoint.Opened)
-                    AddOpenList(jumpPoint);
+                    AddToOpenList(jumpPoint);
             }
         }
     }

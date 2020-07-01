@@ -69,11 +69,12 @@ public enum SearchType
 
 public enum SearchAlgo
 {
-	AStar,
+	Astar,
 	BestFirstSearch,
 	BreadthFirstSearch,
 	DijkstraSearch,
 	ThetaStar,
 	JPS,
 	JPSPlus,
+	BiAstar,
 }

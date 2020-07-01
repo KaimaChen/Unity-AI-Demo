@@ -43,7 +43,7 @@ public class JPSPlus : JumpPointSearch
         dirLookUpTable[c_southWest] = new int[3] { c_southWest, c_south, c_west };
 
         m_start.G = 0;
-        AddOpenList(m_start);
+        AddToOpenList(m_start);
         while(OpenListSize() > 0)
         {
             Vector2Int curtPos = PopOpenList();
@@ -99,7 +99,7 @@ public class JPSPlus : JumpPointSearch
                         if(!newSuccessor.Opened && !newSuccessor.Closed)
                         {
                             newSuccessor.SetParent(curtNode, givenCost);
-                            AddOpenList(newSuccessor);
+                            AddToOpenList(newSuccessor);
                         }
                         else if(givenCost < newSuccessor.G)
                         {

@@ -139,7 +139,7 @@ public class SearchGrid : BaseGrid<SearchNode>
 
         switch(m_searchAlgo)
         {
-            case SearchAlgo.AStar:
+            case SearchAlgo.Astar:
                 algo = new AStar(m_startNode, m_endNode, m_nodes, m_weight, m_showTime);
                 break;
             case SearchAlgo.ThetaStar:
@@ -159,6 +159,9 @@ public class SearchGrid : BaseGrid<SearchNode>
                 break;
             case SearchAlgo.JPSPlus:
                 algo = new JPSPlus(m_startNode, m_endNode, m_nodes, m_weight, m_showTime);
+                break;
+            case SearchAlgo.BiAstar:
+                algo = new BiAStar(m_startNode, m_endNode, m_nodes, m_weight, m_showTime);
                 break;
             default:
                 Debug.LogError($"No code for SearchAlgo={m_searchAlgo}");

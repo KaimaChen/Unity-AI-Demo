@@ -22,11 +22,13 @@ public class AStar : BaseSearchAlgo
     {
         m_start.G = 0;
 
-        AddOpenList(m_start);
+        AddToOpenList(m_start);
         while (OpenListSize() > 0)
         {
             Vector2Int curtPos = PopOpenList();
             SearchNode curtNode = GetNode(curtPos);
+
+            SetVertex(curtNode);
 
             if (curtPos == m_end.Pos) //找到终点
             {
@@ -46,7 +48,12 @@ public class AStar : BaseSearchAlgo
                 {
                     SearchNode neighbor = neighbors[i];
                     if (neighbor.Closed == false)
+                    {
+                        if (neighbor.Opened == false)
+                            neighbor.SetParent(null, float.MaxValue);
+
                         UpdateVertex(curtNode, neighbor);
+                    }
                 }
             }
         }
@@ -67,19 +74,32 @@ public class AStar : BaseSearchAlgo
         }
     }
 
-    protected virtual void UpdateVertex(SearchNode curtNode, SearchNode neighbor)
+    protected virtual void UpdateVertex(SearchNode curtNode, SearchNode nextNode)
     {
-        float oldG = neighbor.Opened ? neighbor.G : float.MaxValue;
-        float newG = curtNode.G + CalcG(curtNode, neighbor);
+        float oldG = nextNode.G;
+        ComputeCost(curtNode, nextNode);
 
-        if (newG < oldG)
-            neighbor.SetParent(curtNode, newG);
-
-        if (neighbor.Opened == false)
-            AddOpenList(neighbor);
+        if(nextNode.G < oldG)
+        {
+            if (nextNode.Opened == false)
+                AddToOpenList(nextNode);
+        }
     }
 
-    protected virtual void AddOpenList(SearchNode node)
+    protected virtual void ComputeCost(SearchNode curtNode, SearchNode nextNode)
+    {
+        //Path 1
+        float cost = curtNode.G + CalcG(curtNode, nextNode);
+        if (cost < nextNode.G)
+            nextNode.SetParent(curtNode, cost);
+    }
+
+    protected virtual void SetVertex(SearchNode node)
+    {
+
+    }
+
+    protected virtual void AddToOpenList(SearchNode node)
     {
         m_openList.Add(node.Pos);
         node.Opened = true;
@@ -91,11 +111,16 @@ public class AStar : BaseSearchAlgo
     /// </summary>
     protected virtual Vector2Int PopOpenList()
     {
-        float min = GetNode(m_openList[0]).F(m_weight);
+        return PopOpenListImpl(m_openList);
+    }
+
+    protected Vector2Int PopOpenListImpl(List<Vector2Int> list)
+    {
+        float min = GetNode(list[0]).F(m_weight);
         int minIndex = 0;
-        for (int i = 1; i < m_openList.Count; i++)
+        for (int i = 1; i < list.Count; i++)
         {
-            float score = GetNode(m_openList[i]).F(m_weight);
+            float score = GetNode(list[i]).F(m_weight);
             if (score < min)
             {
                 min = score;
@@ -103,8 +128,8 @@ public class AStar : BaseSearchAlgo
             }
         }
 
-        Vector2Int result = m_openList[minIndex];
-        m_openList.RemoveAt(minIndex);
+        Vector2Int result = list[minIndex];
+        list.RemoveAt(minIndex);
 
         return result;
     }

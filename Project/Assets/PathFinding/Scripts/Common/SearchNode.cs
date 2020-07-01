@@ -13,17 +13,6 @@ public class SearchNode : BaseNode
     private MeshRenderer m_renderer;
     private Material m_mat;
 
-    #region JPSPlus
-    private TextMesh m_JPSPlusEast;
-    private TextMesh m_JPSPlusWest;
-    private TextMesh m_JPSPlusNorth;
-    private TextMesh m_JPSPlusSouth;
-    private TextMesh m_JPSPlusNorthEast;
-    private TextMesh m_JPSPlusNorthWest;
-    private TextMesh m_JPSPlusSouthEast;
-    private TextMesh m_JPSPlusSouthWest;
-    #endregion
-
     #region get-set
     public SearchNode Parent
     {
@@ -72,23 +61,7 @@ public class SearchNode : BaseNode
         m_mat = m_renderer.material;
         m_mat.color = Define.Cost2Color(cost);
 
-        Transform jpsPlus = transform.Find("JPSPlus");
-        m_JPSPlusEast = jpsPlus.Find("JPSEast").GetComponent<TextMesh>();
-        m_JPSPlusEast.gameObject.SetActive(false);
-        m_JPSPlusWest = jpsPlus.Find("JPSWest").GetComponent<TextMesh>();
-        m_JPSPlusWest.gameObject.SetActive(false);
-        m_JPSPlusNorth = jpsPlus.Find("JPSNorth").GetComponent<TextMesh>();
-        m_JPSPlusNorth.gameObject.SetActive(false);
-        m_JPSPlusSouth = jpsPlus.Find("JPSSouth").GetComponent<TextMesh>();
-        m_JPSPlusSouth.gameObject.SetActive(false);
-        m_JPSPlusNorthEast = jpsPlus.Find("JPSNorthEast").GetComponent<TextMesh>();
-        m_JPSPlusNorthEast.gameObject.SetActive(false);
-        m_JPSPlusNorthWest = jpsPlus.Find("JPSNorthWest").GetComponent<TextMesh>();
-        m_JPSPlusNorthWest.gameObject.SetActive(false);
-        m_JPSPlusSouthEast = jpsPlus.Find("JPSSouthEast").GetComponent<TextMesh>();
-        m_JPSPlusSouthEast.gameObject.SetActive(false);
-        m_JPSPlusSouthWest = jpsPlus.Find("JPSSouthWest").GetComponent<TextMesh>();
-        m_JPSPlusSouthWest.gameObject.SetActive(false);
+        InitJPSPlus();
     }
 
     public void Reset()
@@ -132,6 +105,36 @@ public class SearchNode : BaseNode
     }
 
     #region JPSPlus
+    private TextMesh m_JPSPlusEast;
+    private TextMesh m_JPSPlusWest;
+    private TextMesh m_JPSPlusNorth;
+    private TextMesh m_JPSPlusSouth;
+    private TextMesh m_JPSPlusNorthEast;
+    private TextMesh m_JPSPlusNorthWest;
+    private TextMesh m_JPSPlusSouthEast;
+    private TextMesh m_JPSPlusSouthWest;
+
+    private void InitJPSPlus()
+    {
+        Transform jpsPlus = transform.Find("JPSPlus");
+        m_JPSPlusEast = jpsPlus.Find("JPSEast").GetComponent<TextMesh>();
+        m_JPSPlusEast.gameObject.SetActive(false);
+        m_JPSPlusWest = jpsPlus.Find("JPSWest").GetComponent<TextMesh>();
+        m_JPSPlusWest.gameObject.SetActive(false);
+        m_JPSPlusNorth = jpsPlus.Find("JPSNorth").GetComponent<TextMesh>();
+        m_JPSPlusNorth.gameObject.SetActive(false);
+        m_JPSPlusSouth = jpsPlus.Find("JPSSouth").GetComponent<TextMesh>();
+        m_JPSPlusSouth.gameObject.SetActive(false);
+        m_JPSPlusNorthEast = jpsPlus.Find("JPSNorthEast").GetComponent<TextMesh>();
+        m_JPSPlusNorthEast.gameObject.SetActive(false);
+        m_JPSPlusNorthWest = jpsPlus.Find("JPSNorthWest").GetComponent<TextMesh>();
+        m_JPSPlusNorthWest.gameObject.SetActive(false);
+        m_JPSPlusSouthEast = jpsPlus.Find("JPSSouthEast").GetComponent<TextMesh>();
+        m_JPSPlusSouthEast.gameObject.SetActive(false);
+        m_JPSPlusSouthWest = jpsPlus.Find("JPSSouthWest").GetComponent<TextMesh>();
+        m_JPSPlusSouthWest.gameObject.SetActive(false);
+    }
+
     public void ShowDistance(int east, int west, int north, int south, int northEast, int northWest, int southEast, int southWest)
     {
         Color positiveColor = new Color(0, 0.8f, 0); 
@@ -168,6 +171,42 @@ public class SearchNode : BaseNode
         m_JPSPlusSouthWest.gameObject.SetActive(true);
         m_JPSPlusSouthWest.text = southWest.ToString();
         m_JPSPlusSouthWest.color = southWest > 0 ? positiveColor : otherColor;
+    }
+    #endregion
+
+    #region Goal Bounding
+    private SearchNode m_gbStartNode;
+
+    public SearchNode GBStartNode
+    {
+        get { return m_gbStartNode; }
+        set { m_gbStartNode = value; }
+    }
+    #endregion
+
+    #region Bidirection
+    private const int c_startOpenValue = 1;
+    private const int c_endOpenValue = 2;
+    private int m_openValue;
+
+    public void SetStartOpen()
+    {
+        m_openValue = c_startOpenValue;
+    }
+
+    public bool IsStartOpen()
+    {
+        return m_openValue == c_startOpenValue;
+    }
+
+    public void SetEndOpen()
+    {
+        m_openValue = c_endOpenValue;
+    }
+
+    public bool IsEndOpen()
+    {
+        return m_openValue == c_endOpenValue;
     }
     #endregion
 }
