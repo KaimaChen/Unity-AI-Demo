@@ -74,6 +74,7 @@ public enum SearchAlgo
 	BreadthFirstSearch,
 	DijkstraSearch,
 	ThetaStar,
+	LazyThetaStar,
 	JPS,
 	JPSPlus,
 	BiAstar,

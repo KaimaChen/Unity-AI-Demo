@@ -27,6 +27,9 @@ public class ThetaStar : AStar
         if (startNode == null || endNode == null)
             return false;
 
+        if (startNode == endNode)
+            return true;
+
         Vector2Int start = startNode.Pos;
         Vector2Int end = endNode.Pos;
         int dx = end.x - start.x;

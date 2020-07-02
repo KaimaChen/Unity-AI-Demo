@@ -145,6 +145,9 @@ public class SearchGrid : BaseGrid<SearchNode>
             case SearchAlgo.ThetaStar:
                 algo = new ThetaStar(m_startNode, m_endNode, m_nodes, m_weight, m_showTime);
                 break;
+            case SearchAlgo.LazyThetaStar:
+                algo = new LazyThetaStar(m_startNode, m_endNode, m_nodes, m_weight, m_showTime);
+                break;
             case SearchAlgo.BestFirstSearch:
                 algo = new BestFirstSearch(m_startNode, m_endNode, m_nodes, m_weight, m_showTime);
                 break;
