@@ -8,25 +8,21 @@ public class LazyThetaStar : ThetaStar
 
     protected override void ComputeCost(SearchNode curtNode, SearchNode nextNode)
     {
-        if (curtNode.Parent == null)
-        {
-            if(curtNode == m_start)
-            {
-                float cost = curtNode.G + CalcG(curtNode, nextNode);
-                nextNode.SetParent(curtNode, cost);
-            }
-            return;
-        }
+        //起点没有Parent，所以特殊处理为自己
+        //原Paper将起点的父节点设置为起点，但我不喜欢图里有个自环，所以这样处理
+        var parent = curtNode == m_start ? m_start : curtNode.Parent;
 
         //Path 2
         //假设都通过了LOS检查
-        float newG = curtNode.Parent.G + CalcG(curtNode.Parent, nextNode);
+        float newG = parent.G + CalcG(parent, nextNode);
         if (newG < nextNode.G)
-            nextNode.SetParent(curtNode.Parent, newG);
+            nextNode.SetParent(parent, newG);
     }
 
     protected override void SetVertex(SearchNode node)
     {
+        //起点没有Parent
+        //原Paper将起点的父节点设置为起点，但我不喜欢图里有个自环，所以这样处理
         if (node == m_start)
             return;
 
