@@ -96,7 +96,7 @@ public class SearchNode : BaseNode
         m_g = g;
     }
 
-    public float F(float weight)
+    public float F(float weight = 1)
     {
         if (m_h < 0)
             m_h = SearchGrid.Instance.CalcHeuristic(Pos, SearchGrid.Instance.EndNode.Pos, weight);

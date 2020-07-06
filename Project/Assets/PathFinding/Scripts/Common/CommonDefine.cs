@@ -78,4 +78,5 @@ public enum SearchAlgo
 	JPS,
 	JPSPlus,
 	BiAstar,
+	IDA_Star,
 }

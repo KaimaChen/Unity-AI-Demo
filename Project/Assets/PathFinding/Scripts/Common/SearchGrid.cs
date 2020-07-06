@@ -166,6 +166,9 @@ public class SearchGrid : BaseGrid<SearchNode>
             case SearchAlgo.BiAstar:
                 algo = new BiAStar(m_startNode, m_endNode, m_nodes, m_weight, m_showTime);
                 break;
+            case SearchAlgo.IDA_Star:
+                algo = new IDAStar(m_startNode, m_endNode, m_nodes, m_weight, m_showTime);
+                break;
             default:
                 Debug.LogError($"No code for SearchAlgo={m_searchAlgo}");
                 break;
