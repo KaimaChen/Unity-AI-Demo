@@ -1,9 +1,9 @@
 ﻿using Priority_Queue;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//TODO 如果找不到路径，然后把阻挡删除后，就没有新的寻路了
 public class LPAStar : BaseSearchAlgo
 {
     private const int c_large = 9999;
@@ -20,7 +20,8 @@ public class LPAStar : BaseSearchAlgo
     public override IEnumerator Process()
     {
         Initialize();
-        return ComputeShortestPath();
+        ComputeShortestPath();
+        yield break;
     }
 
     private void Initialize()
@@ -54,14 +55,12 @@ public class LPAStar : BaseSearchAlgo
             return;
 
         curtNode.Rhs = c_large;
-        curtNode.Parent = null;
 
-        List<SearchNode> predList = GetPredList(curtNode);
+        List<SearchNode> predList = GetNeighbors(curtNode);
         for(int i = 0; i < predList.Count; i++)
         {
             SearchNode pred = predList[i];
-            curtNode.Rhs = pred.G + CalcCost(pred, curtNode);
-            curtNode.Parent = pred;
+            curtNode.Rhs = Mathf.Min(curtNode.Rhs, pred.G + CalcCost(pred, curtNode));
         }
     }
 
@@ -80,28 +79,23 @@ public class LPAStar : BaseSearchAlgo
         }
     }
 
-    private IEnumerator ComputeShortestPath()
+    private void ComputeShortestPath()
     {
         while(m_openQueue.Count > 0 && (TopKey() < CalculateKey(m_end)) || !Mathf.Approximately(m_end.Rhs, m_end.G))
         {
             SearchNode curtNode = PopOpenQueue();
 
-            #region show
-            yield return new WaitForSeconds(m_showTime);
-            //curtNode.SetSearchType(SearchType.Expanded, true);
-            #endregion
-
             if (curtNode.G > curtNode.Rhs)
             {
                 curtNode.G = curtNode.Rhs;
-                List<SearchNode> succList = GetSucc(curtNode);
+                List<SearchNode> succList = GetNeighbors(curtNode);
                 for(int i = 0; i < succList.Count; i++)
                     UpdateVertex(succList[i]);
             }
             else
             {
                 curtNode.G = c_large;
-                List<SearchNode> updateList = GetSucc(curtNode);
+                List<SearchNode> updateList = GetNeighbors(curtNode);
                 updateList.Add(curtNode);
                 for (int i = 0; i < updateList.Count; i++)
                     UpdateVertex(updateList[i]);
@@ -109,8 +103,6 @@ public class LPAStar : BaseSearchAlgo
         }
 
         GeneratePath();
-
-        yield break;
     }
 
     public override void NotifyChangeNode(List<SearchNode> nodes)
@@ -130,13 +122,18 @@ public class LPAStar : BaseSearchAlgo
         for (int outerIndex = 0; outerIndex < nodes.Count; outerIndex++)
         {
             if (nodes[outerIndex].IsObstacle())
+            {
+                nodes[outerIndex].G = nodes[outerIndex].Rhs = c_large;
                 RemoveFromOpenQueue(nodes[outerIndex]);
+            }
             else
+            {
                 UpdateVertex(nodes[outerIndex]);
+            }
 
-            List<SearchNode> succList = GetSucc(nodes[outerIndex]);
-            for (int i = 0; i < succList.Count; i++)
-                UpdateVertex(succList[i]);
+            List<SearchNode> neighbors = GetNeighbors(nodes[outerIndex]);
+            for (int i = 0; i < neighbors.Count; i++)
+                UpdateVertex(neighbors[i]);
         }
 
         ComputeShortestPath();
@@ -172,44 +169,6 @@ public class LPAStar : BaseSearchAlgo
                 break;
             }
         }
-    }
-
-    private bool IsPred(SearchNode curtNode, SearchNode neighbor)
-    {
-        return curtNode.Rhs > (neighbor.G + CalcCost(curtNode, neighbor));
-    }
-
-    private List<SearchNode> GetPredList(SearchNode node)
-    {
-        List<SearchNode> result = new List<SearchNode>();
-
-        List<SearchNode> neighbors = GetNeighbors(node);
-        for (int i = 0; i < neighbors.Count; i++)
-        {
-            if (IsPred(node, neighbors[i]))
-                result.Add(neighbors[i]);
-        }
-
-        return result;
-    }
-
-    private bool IsSucc(SearchNode curtNode, SearchNode neighbor)
-    {
-        return neighbor.Rhs >= (curtNode.G + CalcCost(curtNode, neighbor));
-    }
-
-    private List<SearchNode> GetSucc(SearchNode node)
-    {
-        List<SearchNode> result = new List<SearchNode>();
-
-        List<SearchNode> neighbors = GetNeighbors(node);
-        for(int i = 0; i < neighbors.Count; i++)
-        {
-            if (IsSucc(node, neighbors[i]))
-                result.Add(neighbors[i]);
-        }
-
-        return result;
     }
 
     #region Open Queue

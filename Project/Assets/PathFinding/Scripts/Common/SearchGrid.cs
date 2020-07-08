@@ -113,39 +113,40 @@ public class SearchGrid : BaseGrid<SearchNode>
 
     protected override bool AddObstacle()
     {
-        bool changed = false;
-
         SearchNode node = GetMouseOverNode();
         if (node != null && node != m_startNode && node != m_endNode)
         {
-            byte last = node.Cost;
-            node.Reset();
-            node.SetCost(Define.c_costObstacle);
-            changed = last != node.Cost;
+            if(node.Cost != Define.c_costObstacle)
+            {
+                node.SetCost(Define.c_costObstacle);
+
+                if (Algo != null)
+                    Algo.NotifyChangeNode(new List<SearchNode>() { node });
+
+                return true;
+            }
         }
 
-        if (changed && Algo != null)
-            Algo.NotifyChangeNode(new List<SearchNode>() { node });
-
-        return changed;
+        return false;
     }
 
     protected override bool RemoveObstacle()
     {
-        bool changed = false;
-
         SearchNode node = GetMouseOverNode();
         if(node != null && node != m_startNode && node != m_endNode)
         {
-            byte last = node.Cost;
-            node.SetCost(Define.c_costRoad);
-            changed = last != node.Cost;
+            if(node.Cost != Define.c_costRoad)
+            {
+                node.SetCost(Define.c_costRoad);
+
+                if(Algo != null)
+                    Algo.NotifyChangeNode(new List<SearchNode>() { node });
+
+                return true;
+            }
         }
 
-        if(changed && Algo != null)
-            Algo.NotifyChangeNode(new List<SearchNode>() { node });
-
-        return changed;
+        return false;
     }
 
     private SearchNode DragNode()
