@@ -12,5 +12,8 @@ Some AI demo
 * Flow Field
 * Jump Point Search
   * JPS Plus
-* Theta*
-  * Lazy Theta*
+* Any-Angle
+  * Theta*
+    * Lazy Theta*
+* Incremental
+  * LPA*
