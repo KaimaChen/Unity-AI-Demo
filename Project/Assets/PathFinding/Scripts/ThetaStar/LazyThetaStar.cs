@@ -14,7 +14,7 @@ public class LazyThetaStar : ThetaStar
 
         //Path 2
         //假设都通过了LOS检查
-        float newG = parent.G + CalcG(parent, nextNode);
+        float newG = parent.G + CalcCost(parent, nextNode);
         if (newG < nextNode.G)
             nextNode.SetParent(parent, newG);
     }
@@ -38,7 +38,7 @@ public class LazyThetaStar : ThetaStar
                 SearchNode neighbor = neighbors[i];
                 if(neighbor.Closed)
                 {
-                    float newG = neighbor.G + CalcG(neighbor, node);
+                    float newG = neighbor.G + CalcCost(neighbor, node);
                     if (newG < node.G)
                         node.SetParent(neighbor, newG);
                 }

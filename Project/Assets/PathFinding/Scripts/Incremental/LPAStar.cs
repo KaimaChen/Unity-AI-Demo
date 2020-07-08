@@ -20,8 +20,7 @@ public class LPAStar : BaseSearchAlgo
     public override IEnumerator Process()
     {
         Initialize();
-        ComputeShortestPath();
-        yield break;
+        return ComputeShortestPath();
     }
 
     private void Initialize()
@@ -61,7 +60,7 @@ public class LPAStar : BaseSearchAlgo
         for(int i = 0; i < predList.Count; i++)
         {
             SearchNode pred = predList[i];
-            curtNode.Rhs = pred.G + 1;
+            curtNode.Rhs = pred.G + CalcCost(pred, curtNode);
             curtNode.Parent = pred;
         }
     }
@@ -70,7 +69,7 @@ public class LPAStar : BaseSearchAlgo
     {
         UpdateRhs(curtNode);
 
-        if (curtNode.G != curtNode.Rhs)
+        if(!Mathf.Approximately(curtNode.G, curtNode.Rhs))
         {
             curtNode.LPAKey = CalculateKey(curtNode);
             AddToOpenQueue(curtNode, curtNode.LPAKey);
@@ -81,12 +80,18 @@ public class LPAStar : BaseSearchAlgo
         }
     }
 
-    private void ComputeShortestPath()
+    private IEnumerator ComputeShortestPath()
     {
-        while(m_openQueue.Count > 0 && (TopKey() < CalculateKey(m_end)) || m_end.Rhs != m_end.G)
+        while(m_openQueue.Count > 0 && (TopKey() < CalculateKey(m_end)) || !Mathf.Approximately(m_end.Rhs, m_end.G))
         {
-            SearchNode curtNode = GetNode(m_openQueue.Dequeue());
-            if(curtNode.G > curtNode.Rhs)
+            SearchNode curtNode = PopOpenQueue();
+
+            #region show
+            yield return new WaitForSeconds(m_showTime);
+            //curtNode.SetSearchType(SearchType.Expanded, true);
+            #endregion
+
+            if (curtNode.G > curtNode.Rhs)
             {
                 curtNode.G = curtNode.Rhs;
                 List<SearchNode> succList = GetSucc(curtNode);
@@ -104,6 +109,8 @@ public class LPAStar : BaseSearchAlgo
         }
 
         GeneratePath();
+
+        yield break;
     }
 
     public override void NotifyChangeNode(List<SearchNode> nodes)
@@ -115,12 +122,10 @@ public class LPAStar : BaseSearchAlgo
         //重置格子的颜色，以便观察哪些格子被新扩展了
         ForeachNode((node) => 
         { 
-            if(!node.IsObstacle())
+            if(!node.IsObstacle() && node.SearchType != SearchType.Open)
                 node.SetSearchType(SearchType.None, true); 
         });
         #endregion
-
-        HashSet<SearchNode> updateSet = new HashSet<SearchNode>();
 
         for (int outerIndex = 0; outerIndex < nodes.Count; outerIndex++)
         {
@@ -145,35 +150,33 @@ public class LPAStar : BaseSearchAlgo
             return;
         }
 
-        //SearchNode lastNode = m_end;
-        //while(lastNode != null && lastNode != m_start)
-        //{
-        //    List<SearchNode> neighbors = GetNeighbors(lastNode);
-        //    for(int i = 0; i < neighbors.Count; i++)
-        //    {
-        //        if(neighbors[i].G + CalcG(lastNode, neighbors[i]) == lastNode.G)
-        //        {
-        //            lastNode = neighbors[i];
-        //            lastNode.SetSearchType(SearchType.Path, true);
-        //            break;
-        //        }
-        //    }
-        //}
-
         SearchNode lastNode = m_end;
-        while (lastNode != null)
+        while (lastNode != null && lastNode != m_start)
         {
-            lastNode.SetSearchType(SearchType.Path, true);
-            if (lastNode != m_start)
-                lastNode = lastNode.Parent;
-            else
+            bool found = false;
+            List<SearchNode> neighbors = GetNeighbors(lastNode);
+            for (int i = 0; i < neighbors.Count; i++)
+            {
+                if (neighbors[i].G < lastNode.G && Mathf.Approximately(neighbors[i].G + CalcCost(lastNode, neighbors[i]), lastNode.G))
+                {
+                    found = true;
+                    lastNode = neighbors[i];
+                    lastNode.SetSearchType(SearchType.Path, true);
+                    break;
+                }
+            }
+
+            if(!found)
+            {
+                Debug.LogError($"生成路径失败，在{lastNode.Pos}处中断");
                 break;
+            }
         }
     }
 
     private bool IsPred(SearchNode curtNode, SearchNode neighbor)
     {
-        return curtNode.Rhs > (neighbor.G + 1);
+        return curtNode.Rhs > (neighbor.G + CalcCost(curtNode, neighbor));
     }
 
     private List<SearchNode> GetPredList(SearchNode node)
@@ -192,7 +195,7 @@ public class LPAStar : BaseSearchAlgo
 
     private bool IsSucc(SearchNode curtNode, SearchNode neighbor)
     {
-        return neighbor.Rhs > (curtNode.G + 1);
+        return neighbor.Rhs >= (curtNode.G + CalcCost(curtNode, neighbor));
     }
 
     private List<SearchNode> GetSucc(SearchNode node)
@@ -231,6 +234,14 @@ public class LPAStar : BaseSearchAlgo
             node.Opened = false;
             node.SetSearchType(SearchType.None, true);
         }
+    }
+
+    private SearchNode PopOpenQueue()
+    {
+        SearchNode node = GetNode(m_openQueue.Dequeue());
+        node.Opened = false;
+        node.SetSearchType(SearchType.None, true);
+        return node;
     }
 
     private float TopKey()

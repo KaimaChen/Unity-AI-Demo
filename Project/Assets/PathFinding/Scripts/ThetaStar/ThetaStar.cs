@@ -11,7 +11,7 @@ public class ThetaStar : AStar
         if(LineOfSign(curtNode.Parent, nextNode))
         {
             //Path 2
-            float newG = curtNode.Parent.G + CalcG(curtNode.Parent, nextNode);
+            float newG = curtNode.Parent.G + CalcCost(curtNode.Parent, nextNode);
             if (newG < nextNode.G)
                 nextNode.SetParent(curtNode.Parent, newG);
         }

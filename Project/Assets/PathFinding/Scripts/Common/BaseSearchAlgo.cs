@@ -84,11 +84,11 @@ public abstract class BaseSearchAlgo
         return GetNode(pos.x, pos.y);
     }
 
-    protected virtual float CalcG(SearchNode a, SearchNode b)
+    protected virtual float CalcCost(SearchNode a, SearchNode b)
     {
         Vector2Int ap = a.Pos;
         Vector2Int bp = b.Pos;
-        return Heuristic.Octile(ap, bp) * b.Cost; //TODO 对于FlowField，需要把直线上的所有格子代价都加进来
+        return SearchGrid.Instance.CalcHeuristic(ap, bp, b.Cost); //TODO 对于FlowField，需要把直线上的所有格子代价都加进来
     }
 
     public virtual void NotifyChangeNode(List<SearchNode> nodes) { }
