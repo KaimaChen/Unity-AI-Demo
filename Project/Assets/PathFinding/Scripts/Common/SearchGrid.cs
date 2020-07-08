@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 
 /// <summary>
 /// 操作：
@@ -7,6 +7,8 @@ using System.Collections;
 /// </summary>
 public class SearchGrid : BaseGrid<SearchNode>
 {
+    private static SearchGrid m_instance;
+
     public SearchAlgo m_searchAlgo;
     public HeuristicType m_heuristicType;
     public float m_weight = 1;
@@ -18,7 +20,7 @@ public class SearchGrid : BaseGrid<SearchNode>
     private bool m_dragStartNode;
     private bool m_dragEndNode;
 
-    private static SearchGrid m_instance;
+    private BaseSearchAlgo m_algo;
 
     #region get-set
     public static SearchGrid Instance { get { return m_instance; } }
@@ -26,6 +28,16 @@ public class SearchGrid : BaseGrid<SearchNode>
     public SearchNode StartNode { get { return m_startNode; } }
 
     public SearchNode EndNode { get { return m_endNode; } }
+
+    private BaseSearchAlgo Algo
+    {
+        get
+        {
+            if (m_algo == null)
+                m_algo = GetAlgorithm();
+            return m_algo;
+        }
+    }
     #endregion
 
     protected override void Awake()
@@ -94,20 +106,46 @@ public class SearchGrid : BaseGrid<SearchNode>
     protected override void Generate()
     {
         Reset();
-        StartCoroutine(Algorithm());
+
+        if(Algo != null)
+            StartCoroutine(Algo.Process());
     }
 
     protected override bool AddObstacle()
     {
-        BaseNode node = GetMouseOverNode();
+        bool changed = false;
+
+        SearchNode node = GetMouseOverNode();
         if (node != null && node != m_startNode && node != m_endNode)
         {
             byte last = node.Cost;
+            node.Reset();
             node.SetCost(Define.c_costObstacle);
-            return last != node.Cost;
+            changed = last != node.Cost;
         }
 
-        return false;
+        if (changed && Algo != null)
+            Algo.NotifyChangeNode(new List<SearchNode>() { node });
+
+        return changed;
+    }
+
+    protected override bool RemoveObstacle()
+    {
+        bool changed = false;
+
+        SearchNode node = GetMouseOverNode();
+        if(node != null && node != m_startNode && node != m_endNode)
+        {
+            byte last = node.Cost;
+            node.SetCost(Define.c_costRoad);
+            changed = last != node.Cost;
+        }
+
+        if(changed && Algo != null)
+            Algo.NotifyChangeNode(new List<SearchNode>() { node });
+
+        return changed;
     }
 
     private SearchNode DragNode()
@@ -131,9 +169,11 @@ public class SearchGrid : BaseGrid<SearchNode>
 
         m_startNode.SetSearchType(SearchType.Start, false);
         m_endNode.SetSearchType(SearchType.End, false);
+
+        m_algo = null;
     }
 
-    public IEnumerator Algorithm()
+    private BaseSearchAlgo GetAlgorithm()
     {
         BaseSearchAlgo algo = null;
 
@@ -166,18 +206,15 @@ public class SearchGrid : BaseGrid<SearchNode>
             case SearchAlgo.BiAstar:
                 algo = new BiAStar(m_startNode, m_endNode, m_nodes, m_weight, m_showTime);
                 break;
-            case SearchAlgo.IDA_Star:
-                algo = new IDAStar(m_startNode, m_endNode, m_nodes, m_weight, m_showTime);
+            case SearchAlgo.LPA_Star:
+                algo = new LPAStar(m_startNode, m_endNode, m_nodes, m_showTime);
                 break;
             default:
                 Debug.LogError($"No code for SearchAlgo={m_searchAlgo}");
                 break;
         }
 
-        if (algo != null)
-            return algo.Process();
-        else
-            return null;
+        return algo;
     }
 
     public float CalcHeuristic(Vector2Int a, Vector2Int b, float weight)

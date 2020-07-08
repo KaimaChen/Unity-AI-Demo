@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -88,5 +89,14 @@ public abstract class BaseSearchAlgo
         Vector2Int ap = a.Pos;
         Vector2Int bp = b.Pos;
         return Heuristic.Octile(ap, bp) * b.Cost; //TODO 对于FlowField，需要把直线上的所有格子代价都加进来
+    }
+
+    public virtual void NotifyChangeNode(List<SearchNode> nodes) { }
+
+    protected void ForeachNode(Action<SearchNode> callback)
+    {
+        for(int y = 0; y < m_mapHeight; y++)
+            for(int x = 0; x < m_mapWidth; x++)
+                callback(m_nodes[y, x]);
     }
 }

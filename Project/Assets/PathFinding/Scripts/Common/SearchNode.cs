@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
+using System;
 
 public class SearchNode : BaseNode
 {
@@ -14,9 +15,15 @@ public class SearchNode : BaseNode
     private Material m_mat;
 
     #region get-set
+    public SearchType SearchType
+    {
+        get { return m_searchType; }
+    }
+
     public SearchNode Parent
     {
         get { return m_parent; }
+        set { m_parent = value; }
     }
 
     public bool Opened
@@ -35,6 +42,17 @@ public class SearchNode : BaseNode
     { 
         get { return m_g; } 
         set { m_g = value; }
+    }
+
+    public float H
+    {
+        get
+        {
+            if (m_h < 0)
+                m_h = SearchGrid.Instance.CalcHeuristic(Pos, SearchGrid.Instance.EndNode.Pos, 1);
+
+            return m_h;
+        }
     }
     #endregion
 
@@ -96,12 +114,9 @@ public class SearchNode : BaseNode
         m_g = g;
     }
 
-    public float F(float weight = 1)
+    public float F(float weight)
     {
-        if (m_h < 0)
-            m_h = SearchGrid.Instance.CalcHeuristic(Pos, SearchGrid.Instance.EndNode.Pos, weight);
-
-        return m_g + m_h;
+        return m_g + H;
     }
 
     #region JPSPlus
@@ -207,6 +222,23 @@ public class SearchNode : BaseNode
     public bool IsEndOpen()
     {
         return m_openValue == c_endOpenValue;
+    }
+    #endregion
+
+    #region LPA*
+    [SerializeField] private float m_rhs;
+    [SerializeField] private float m_LPAKey;
+
+    public float Rhs
+    {
+        get { return m_rhs; }
+        set { m_rhs = value; }
+    }
+
+    public float LPAKey
+    {
+        get { return m_LPAKey; }
+        set { m_LPAKey = value; }
     }
     #endregion
 }
