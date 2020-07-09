@@ -28,16 +28,6 @@ public class SearchGrid : BaseGrid<SearchNode>
     public SearchNode StartNode { get { return m_startNode; } }
 
     public SearchNode EndNode { get { return m_endNode; } }
-
-    private BaseSearchAlgo Algo
-    {
-        get
-        {
-            if (m_algo == null)
-                m_algo = GetAlgorithm();
-            return m_algo;
-        }
-    }
     #endregion
 
     protected override void Awake()
@@ -107,8 +97,10 @@ public class SearchGrid : BaseGrid<SearchNode>
     {
         Reset();
 
-        if(Algo != null)
-            StartCoroutine(Algo.Process());
+        if (m_algo == null)
+            m_algo = GetAlgorithm();
+        if (m_algo != null)
+            StartCoroutine(m_algo.Process());
     }
 
     protected override bool AddObstacle()
@@ -120,8 +112,8 @@ public class SearchGrid : BaseGrid<SearchNode>
             {
                 node.SetCost(Define.c_costObstacle);
 
-                if (Algo != null)
-                    Algo.NotifyChangeNode(new List<SearchNode>() { node });
+                if (m_algo != null)
+                    m_algo.NotifyChangeNode(new List<SearchNode>() { node });
 
                 return true;
             }
@@ -139,8 +131,8 @@ public class SearchGrid : BaseGrid<SearchNode>
             {
                 node.SetCost(Define.c_costRoad);
 
-                if(Algo != null)
-                    Algo.NotifyChangeNode(new List<SearchNode>() { node });
+                if(m_algo != null)
+                    m_algo.NotifyChangeNode(new List<SearchNode>() { node });
 
                 return true;
             }
@@ -209,6 +201,7 @@ public class SearchGrid : BaseGrid<SearchNode>
                 break;
             case SearchAlgo.LPA_Star:
                 algo = new LPAStar(m_startNode, m_endNode, m_nodes, m_showTime);
+                //algo = new LPAStar_Optimized(m_startNode, m_endNode, m_nodes, m_showTime);
                 break;
             default:
                 Debug.LogError($"No code for SearchAlgo={m_searchAlgo}");

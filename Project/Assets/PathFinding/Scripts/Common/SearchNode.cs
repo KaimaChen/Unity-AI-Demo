@@ -99,9 +99,12 @@ public class SearchNode : BaseNode
         m_mat.color = Define.Cost2Color(cost);
     }
 
-    public void SetSearchType(SearchType type, bool excludeStartEnd)
+    public void SetSearchType(SearchType type, bool excludeStartEnd, bool excludeObstacle = false)
     {
         if (excludeStartEnd && (m_searchType == SearchType.Start || m_searchType == SearchType.End))
+            return;
+
+        if (excludeObstacle && IsObstacle())
             return;
 
         m_searchType = type;
@@ -227,18 +230,36 @@ public class SearchNode : BaseNode
 
     #region LPA*
     [SerializeField] private float m_rhs;
-    [SerializeField] private float m_LPAKey;
+    [SerializeField] private SearchNode m_rhsSource; //rhs是根据哪个节点计算得来的
+    [SerializeField] private LPAKey m_LPAKey;
+    [SerializeField] private int m_iteration;
 
     public float Rhs
     {
         get { return m_rhs; }
-        set { m_rhs = value; }
     }
 
-    public float LPAKey
+    public SearchNode RhsSource
+    {
+        get { return m_rhsSource; }
+    }
+
+    public LPAKey LPAKey
     {
         get { return m_LPAKey; }
         set { m_LPAKey = value; }
+    }
+
+    public int Iteration
+    {
+        get { return m_iteration; }
+        set { m_iteration = value; }
+    }
+
+    public void SetRhs(float value, SearchNode source)
+    {
+        m_rhs = value;
+        m_rhsSource = source;
     }
     #endregion
 }
