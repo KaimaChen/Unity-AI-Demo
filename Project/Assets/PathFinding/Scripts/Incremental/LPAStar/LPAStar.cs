@@ -48,7 +48,7 @@ public class LPAStar : BaseSearchAlgo
 
     protected void UpdateRhs(SearchNode curtNode)
     {
-        if (curtNode == m_start || curtNode.IsObstacle())
+        if (curtNode == m_start)
             return;
 
         if(curtNode.IsObstacle())
@@ -63,8 +63,13 @@ public class LPAStar : BaseSearchAlgo
         List<SearchNode> neighbors = GetNeighbors(curtNode);
         for(int i = 0; i < neighbors.Count; i++)
         {
-            SearchNode pred = neighbors[i];
-            minRhs = Mathf.Min(minRhs, pred.G + CalcCost(pred, curtNode));
+            SearchNode neighbor = neighbors[i];
+            float value = neighbor.G + CalcCost(neighbor, curtNode);
+            if(value < minRhs)
+            {
+                minRhs = value;
+                minNode = neighbor;
+            }
         }
 
         curtNode.SetRhs(minRhs, minNode);
