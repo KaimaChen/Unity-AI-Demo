@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class LPAStar : BaseSearchAlgo
 {
-    protected const int c_large = 9999;
+    protected const int c_large = 999999; //这里自己定义了一个较大的值，而不使用int.maxValue是为了避免后面的运算超出范围
 
     protected readonly SimplePriorityQueue<Vector2Int, LPAKey> m_openQueue;
 
