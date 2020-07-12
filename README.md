@@ -16,6 +16,7 @@ Some AI demo
     * Lazy Theta*
 * Incremental Search
   * LPA*
+  * D* Lite
 * Other Search
   * Flow Field
   * Jump Point Search
