@@ -106,12 +106,12 @@ public class SearchNode : BaseNode
         m_mat.color = Define.Cost2Color(cost);
     }
 
-    public void SetSearchType(SearchType type, bool excludeStartEnd, bool excludeObstacle = false)
+    public void SetSearchType(SearchType type, bool excludeStartEnd, bool excludeSpecial = false)
     {
         if (excludeStartEnd && (m_searchType == SearchType.Start || m_searchType == SearchType.End))
             return;
 
-        if (excludeObstacle && IsObstacle())
+        if (excludeSpecial && (IsObstacle() || m_searchType == SearchType.Path || m_searchType == SearchType.CurtPos))
             return;
 
         m_searchType = type;

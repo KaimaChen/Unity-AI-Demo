@@ -2,8 +2,8 @@
 {
     private readonly int m_unitSize;
 
-    public AnnotatedAStar(SearchNode start, SearchNode end, SearchNode[,] nodes, float weight, float showTime, int unitSize)
-        : base(start, end, nodes, weight, showTime)
+    public AnnotatedAStar(SearchNode start, SearchNode goal, SearchNode[,] nodes, float weight, float showTime, int unitSize)
+        : base(start, goal, nodes, weight, showTime)
     {
         m_unitSize = unitSize;
     }

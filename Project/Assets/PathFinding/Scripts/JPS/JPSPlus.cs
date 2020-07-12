@@ -20,8 +20,8 @@ public class JPSPlus : JumpPointSearch
 
     private readonly int[,,] m_distanceData;
 
-    public JPSPlus(SearchNode start, SearchNode end, SearchNode[,] nodes, float weight, float showTime)
-        : base(start, end, nodes, weight, showTime)
+    public JPSPlus(SearchNode start, SearchNode goal, SearchNode[,] nodes, float weight, float showTime)
+        : base(start, goal, nodes, weight, showTime)
     {
         m_distanceData = new int[nodes.GetLength(0), nodes.GetLength(1), c_dirCount];
     }
@@ -50,7 +50,7 @@ public class JPSPlus : JumpPointSearch
             SearchNode curtNode = GetNode(curtPos);
             curtNode.Closed = true;
 
-            if(curtPos == m_end.Pos)
+            if(curtPos == m_goal.Pos)
                 break;
 
             #region 展示
@@ -70,18 +70,18 @@ public class JPSPlus : JumpPointSearch
                     float givenCost = float.MaxValue;
 
                     if(IsCardinal(dir) && IsTargetInExactDir(curtNode, dir) &&
-                        DiffNodes(curtNode, m_end) <= Mathf.Abs(Distance(curtNode, dir)))
+                        DiffNodes(curtNode, m_goal) <= Mathf.Abs(Distance(curtNode, dir)))
                     {
                         //目标比障碍或跳点更近
-                        newSuccessor = m_end;
-                        givenCost = curtNode.G + DiffNodes(curtNode, m_end);
+                        newSuccessor = m_goal;
+                        givenCost = curtNode.G + DiffNodes(curtNode, m_goal);
                     }
                     else if(IsDiagonal(dir) && IsTargetInGeneralDir(curtNode, dir) &&
-                                (DiffNodesRow(curtNode, m_end) <= Mathf.Abs(Distance(curtNode, dir)) ||
-                                DiffNodesCol(curtNode, m_end) <= Mathf.Abs(Distance(curtNode, dir))))
+                                (DiffNodesRow(curtNode, m_goal) <= Mathf.Abs(Distance(curtNode, dir)) ||
+                                DiffNodesCol(curtNode, m_goal) <= Mathf.Abs(Distance(curtNode, dir))))
                     {
                         //目标在水平或竖直方向上比障碍或跳点更近
-                        int minDiff = Mathf.Min(RowDiff(curtNode, m_end), ColDiff(curtNode, m_end));
+                        int minDiff = Mathf.Min(RowDiff(curtNode, m_goal), ColDiff(curtNode, m_goal));
                         newSuccessor = GetNodeInDir(curtNode, minDiff, dir);
                         givenCost = curtNode.G + (Define.c_sqrt2 * minDiff);
                     }
@@ -162,14 +162,14 @@ public class JPSPlus : JumpPointSearch
 
     private bool IsTargetInExactDir(SearchNode curtNode, int dir)
     {
-        int targetDir = CalcDir(curtNode, m_end);
+        int targetDir = CalcDir(curtNode, m_goal);
         return targetDir == dir;
     }
 
     private bool IsTargetInGeneralDir(SearchNode curtNode, int dir)
     {
-        int dx = m_end.X - curtNode.X;
-        int dy = m_end.Y - curtNode.Y;
+        int dx = m_goal.X - curtNode.X;
+        int dy = m_goal.Y - curtNode.Y;
 
         if (dir == c_northEast)
             return (dx >= 0 && dy >= 0);

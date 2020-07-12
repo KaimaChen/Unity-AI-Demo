@@ -13,14 +13,24 @@ public class LPAStar : BaseSearchAlgo
 
     protected readonly SimplePriorityQueue<Vector2Int, LPAKey> m_openQueue = new SimplePriorityQueue<Vector2Int, LPAKey>();
 
-    public LPAStar(SearchNode start, SearchNode end, SearchNode[,] nodes, float showTime)
-        : base(start, end, nodes, showTime) { }
+    public LPAStar(SearchNode start, SearchNode goal, SearchNode[,] nodes, float showTime)
+        : base(start, goal, nodes, showTime) { }
 
     public override IEnumerator Process()
     {
         Initialize();
         ComputeShortestPath();
         yield break;
+    }
+
+    protected virtual SearchNode BeginNode()
+    {
+        return m_start;
+    }
+
+    protected virtual SearchNode EndNode()
+    {
+        return m_goal;
     }
 
     protected virtual void Initialize()
@@ -33,12 +43,12 @@ public class LPAStar : BaseSearchAlgo
             node.SetRhs(c_large, null);
         });
 
-        m_start.SetRhs(0, null);
-        m_start.LPAKey = CalculateKey(m_start);
-        AddOrUpdateOpenQueue(m_start);
+        BeginNode().SetRhs(0, null);
+        BeginNode().LPAKey = CalculateKey(BeginNode());
+        AddOrUpdateOpenQueue(BeginNode());
     }
 
-    protected LPAKey CalculateKey(SearchNode node)
+    protected virtual LPAKey CalculateKey(SearchNode node)
     {
         float key2 = Mathf.Min(node.G, node.Rhs); //类似A*的g
         float key1 = key2 + node.H; //类似A*的f
@@ -47,7 +57,7 @@ public class LPAStar : BaseSearchAlgo
 
     protected void UpdateRhs(SearchNode curtNode)
     {
-        if (curtNode == m_start)
+        if (curtNode == BeginNode())
             return;
 
         if(curtNode.IsObstacle())
@@ -115,7 +125,7 @@ public class LPAStar : BaseSearchAlgo
     protected virtual void ComputeShortestPath()
     {
         //停止条件：目标点已经局部一致 且 开放队列中没有比目标点Key值更小的（即没有更短的路径）
-        while(m_openQueue.Count > 0 && (TopKey() < CalculateKey(m_end)) || !Mathf.Approximately(m_end.Rhs, m_end.G))
+        while(m_openQueue.Count > 0 && (TopKey() < CalculateKey(EndNode())) || !Mathf.Approximately(EndNode().Rhs, EndNode().G))
         {
             SearchNode curtNode = PopOpenQueue();
 
@@ -139,6 +149,11 @@ public class LPAStar : BaseSearchAlgo
         });
         #endregion
 
+        HandleChangedNode(nodes);
+    }
+
+    protected virtual void HandleChangedNode(List<SearchNode> nodes)
+    {
         for (int outerIndex = 0; outerIndex < nodes.Count; outerIndex++)
         {
             SearchNode node = nodes[outerIndex];
@@ -153,16 +168,16 @@ public class LPAStar : BaseSearchAlgo
         ComputeShortestPath();
     }
 
-    protected void GeneratePath()
+    protected virtual void GeneratePath()
     {
-        if(m_end.Rhs == c_large)
+        if(EndNode().Rhs == c_large)
         {
             Debug.LogError("找不到路径");
             return;
         }
 
-        SearchNode lastNode = m_end;
-        while (lastNode != null && lastNode != m_start)
+        SearchNode lastNode = EndNode();
+        while (lastNode != null && lastNode != BeginNode())
         {
             float min = float.MaxValue;
             SearchNode minNode = null;

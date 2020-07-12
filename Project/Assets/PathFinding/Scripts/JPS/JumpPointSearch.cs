@@ -4,8 +4,8 @@ using System.Collections.Generic;
 
 public class JumpPointSearch : AStar
 {
-    public JumpPointSearch(SearchNode start, SearchNode end, SearchNode[,] nodes, float weight, float showTime)
-        : base(start, end, nodes, weight, showTime)
+    public JumpPointSearch(SearchNode start, SearchNode goal, SearchNode[,] nodes, float weight, float showTime)
+        : base(start, goal, nodes, weight, showTime)
     {
 
     }
@@ -20,7 +20,7 @@ public class JumpPointSearch : AStar
             Vector2Int curtPos = PopOpenList();
             SearchNode curtNode = GetNode(curtPos);
 
-            if(curtPos == m_end.Pos)
+            if(curtPos == m_goal.Pos)
             {
                 break;
             }
@@ -79,8 +79,8 @@ public class JumpPointSearch : AStar
         if (!IsWalkableAt(x, y))
             return null;
 
-        if (m_end.Pos == new Vector2Int(x, y))
-            return m_end;
+        if (m_goal.Pos == new Vector2Int(x, y))
+            return m_goal;
         
         //检查有没有forced neighbors
         if(dx != 0 && dy != 0)

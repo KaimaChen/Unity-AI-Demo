@@ -4,7 +4,7 @@
 /// </summary>
 public class DijkstraSearch : AStar
 {
-    public DijkstraSearch(SearchNode start, SearchNode end, SearchNode[,] nodes, float weight, float showTime)
-        : base(start, end, nodes, 0, showTime)
+    public DijkstraSearch(SearchNode start, SearchNode goal, SearchNode[,] nodes, float weight, float showTime)
+        : base(start, goal, nodes, 0, showTime)
     { }
 }

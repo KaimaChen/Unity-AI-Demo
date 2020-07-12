@@ -7,8 +7,8 @@ public class BiAStar : AStar
     private readonly List<Vector2Int> m_startOpenList = new List<Vector2Int>();
     private readonly List<Vector2Int> m_endOpenList = new List<Vector2Int>();
 
-    public BiAStar(SearchNode start, SearchNode end, SearchNode[,] nodes, float weight, float showTime)
-        : base(start, end, nodes, weight, showTime)
+    public BiAStar(SearchNode start, SearchNode goal, SearchNode[,] nodes, float weight, float showTime)
+        : base(start, goal, nodes, weight, showTime)
     {
 
     }
@@ -18,8 +18,8 @@ public class BiAStar : AStar
         m_start.G = 0;
         AddToOpenList(m_start, true);
 
-        m_end.G = 0;
-        AddToOpenList(m_end, false);
+        m_goal.G = 0;
+        AddToOpenList(m_goal, false);
 
         SearchNode startStopNode = null, endStopNode = null;
 

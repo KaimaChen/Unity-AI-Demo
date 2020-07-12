@@ -2,8 +2,8 @@
 
 public class ThetaStar : AStar
 {
-    public ThetaStar(SearchNode start, SearchNode end, SearchNode[,] nodes, float weight, float showTime)
-        : base(start, end, nodes, weight, showTime)
+    public ThetaStar(SearchNode start, SearchNode goal, SearchNode[,] nodes, float weight, float showTime)
+        : base(start, goal, nodes, weight, showTime)
     { }
 
     protected override void ComputeCost(SearchNode curtNode, SearchNode nextNode)

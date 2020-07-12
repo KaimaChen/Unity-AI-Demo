@@ -37,6 +37,8 @@ public static class Define
 				return Color.cyan;
 			case SearchType.Path:
 				return Color.yellow;
+			case SearchType.CurtPos:
+				return Color.blue;
 			default:
 				return Color.white;
 		}
@@ -65,6 +67,7 @@ public enum SearchType
 	Open,
 	Expanded,
 	Path,
+	CurtPos,
 }
 
 public enum SearchAlgo
@@ -78,7 +81,10 @@ public enum SearchAlgo
 	JPS,
 	JPSPlus,
 	BiAstar,
+	//Incremental
 	IDA_Star,
 	LPA_Star,
+	DstarLite,
+	//Hierarchy
 	AnnotatedAstar,
 }

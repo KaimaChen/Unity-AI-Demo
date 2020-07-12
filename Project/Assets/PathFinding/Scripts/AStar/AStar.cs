@@ -12,8 +12,8 @@ public class AStar : BaseSearchAlgo
     private readonly float m_weight = 1;
     protected readonly List<Vector2Int> m_openList = new List<Vector2Int>();
 
-    public AStar(SearchNode start, SearchNode end, SearchNode[,] nodes, float weight, float showTime)
-        : base(start, end, nodes, showTime)
+    public AStar(SearchNode start, SearchNode goal, SearchNode[,] nodes, float weight, float showTime)
+        : base(start, goal, nodes, showTime)
     {
         m_weight = weight;
     }
@@ -33,7 +33,7 @@ public class AStar : BaseSearchAlgo
 
             SetVertex(curtNode);
 
-            if (curtPos == m_end.Pos) //找到终点
+            if (curtPos == m_goal.Pos) //找到终点
             {
                 break;
             }
@@ -79,7 +79,7 @@ public class AStar : BaseSearchAlgo
 
     protected void GeneratePath()
     {
-        SearchNode lastNode = GetNode(m_end.Pos);
+        SearchNode lastNode = GetNode(m_goal.Pos);
         while (lastNode != null)
         {
             lastNode.SetSearchType(SearchType.Path, true);

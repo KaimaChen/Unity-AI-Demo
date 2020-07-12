@@ -6,7 +6,7 @@ using UnityEngine;
 public abstract class BaseSearchAlgo
 {
     protected readonly SearchNode m_start;
-    protected readonly SearchNode m_end;
+    protected readonly SearchNode m_goal;
     protected readonly SearchNode[,] m_nodes;
     protected readonly int m_mapWidth;
     protected readonly int m_mapHeight;
@@ -16,7 +16,7 @@ public abstract class BaseSearchAlgo
     public BaseSearchAlgo(SearchNode start, SearchNode end, SearchNode[,] nodes, float showTime)
     {
         m_start = start;
-        m_end = end;
+        m_goal = end;
         m_nodes = nodes;
         m_showTime = showTime;
 
@@ -44,7 +44,7 @@ public abstract class BaseSearchAlgo
         return result;
     }
 
-    protected bool TryAddNeighbor(Vector2Int curtPos, int dx, int dy, List<SearchNode> result)
+    protected virtual bool TryAddNeighbor(Vector2Int curtPos, int dx, int dy, List<SearchNode> result)
     {
         int x = curtPos.x + dx;
         int y = curtPos.y + dy;

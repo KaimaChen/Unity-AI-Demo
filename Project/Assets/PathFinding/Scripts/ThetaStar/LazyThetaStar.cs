@@ -2,8 +2,8 @@
 
 public class LazyThetaStar : ThetaStar
 {
-    public LazyThetaStar(SearchNode start, SearchNode end, SearchNode[,] nodes, float weight, float showTime)
-        : base(start, end, nodes, weight, showTime)
+    public LazyThetaStar(SearchNode start, SearchNode goal, SearchNode[,] nodes, float weight, float showTime)
+        : base(start, goal, nodes, weight, showTime)
     { }
 
     protected override void ComputeCost(SearchNode curtNode, SearchNode nextNode)

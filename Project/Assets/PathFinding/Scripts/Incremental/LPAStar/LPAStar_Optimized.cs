@@ -8,8 +8,8 @@ public class LPAStar_Optimized : LPAStar
 {
     private int m_mazeIteration;
 
-    public LPAStar_Optimized(SearchNode start, SearchNode end, SearchNode[,] nodes, float showTime)
-        : base(start, end, nodes, showTime) { }
+    public LPAStar_Optimized(SearchNode start, SearchNode goal, SearchNode[,] nodes, float showTime)
+        : base(start, goal, nodes, showTime) { }
 
     protected override void Initialize()
     {
@@ -23,9 +23,9 @@ public class LPAStar_Optimized : LPAStar
         m_start.Iteration = m_mazeIteration;
         AddOrUpdateOpenQueue(m_start);
 
-        m_end.G = c_large;
-        m_end.SetRhs(c_large, null);
-        m_end.Iteration = m_mazeIteration;
+        m_goal.G = c_large;
+        m_goal.SetRhs(c_large, null);
+        m_goal.Iteration = m_mazeIteration;
 
         //优化点：避免遍历所有格子
         //* 实际应用时，因为格子可能很多，导致遍历格子十分耗时，而且其中很多格子根本不会访问到
@@ -103,7 +103,7 @@ public class LPAStar_Optimized : LPAStar
         //* 扩展终点会把其g值设置为rhs值，让其变为局部一致，然后整个搜索结束
         //* 但最终生成路径时并不会使用到终点的g值，因此这一步可以省掉
         //* 该优化能避免扩展其它Key值与终点相同的点
-        while(m_openQueue.Count > 0 && (TopKey() < CalculateKey(m_end) || m_end.Rhs > m_end.G))
+        while(m_openQueue.Count > 0 && (TopKey() < CalculateKey(m_goal) || m_goal.Rhs > m_goal.G))
         {
             //优化点：减少开放队列的操作
             //* 这里由Pop改为Top，可以在欠一致的情况下减少一次移除操作的开销

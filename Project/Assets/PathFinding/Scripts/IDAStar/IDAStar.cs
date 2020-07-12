@@ -66,7 +66,7 @@ public class IDAStar : BaseSearchAlgo
         if (f > threshold)
             return f;
 
-        if (node == m_end)
+        if (node == m_goal)
             return c_found;
 
         float min = float.MaxValue;
