@@ -20,6 +20,9 @@ public class AStar : BaseSearchAlgo
 
     public override IEnumerator Process()
     {
+        //离线预处理，这里为了展示方便所以放到Process()里
+        Preprocess();
+
         m_start.G = 0;
 
         AddToOpenList(m_start);
@@ -47,7 +50,7 @@ public class AStar : BaseSearchAlgo
                 for (int i = 0; i < neighbors.Count; i++)
                 {
                     SearchNode neighbor = neighbors[i];
-                    if (neighbor.Closed == false)
+                    if (IsNeighborValid(neighbor))
                     {
                         if (neighbor.Opened == false)
                             neighbor.SetParent(null, float.MaxValue);
@@ -62,6 +65,16 @@ public class AStar : BaseSearchAlgo
         GeneratePath();
 
         yield break;
+    }
+
+    protected virtual void Preprocess()
+    {
+
+    }
+
+    protected virtual bool IsNeighborValid(SearchNode neighbor)
+    {
+        return neighbor.Closed == false;
     }
 
     protected void GeneratePath()

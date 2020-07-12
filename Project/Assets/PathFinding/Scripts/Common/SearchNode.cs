@@ -13,6 +13,7 @@ public class SearchNode : BaseNode
 
     private MeshRenderer m_renderer;
     private Material m_mat;
+    private TextMesh m_valueText;
 
     #region get-set
     public SearchType SearchType
@@ -79,6 +80,9 @@ public class SearchNode : BaseNode
         m_mat = m_renderer.material;
         m_mat.color = Define.Cost2Color(cost);
 
+        m_valueText = transform.Find("Value").GetComponent<TextMesh>();
+        m_valueText.gameObject.SetActive(false);
+
         InitJPSPlus();
     }
 
@@ -91,6 +95,9 @@ public class SearchNode : BaseNode
 
         m_mat.color = Define.Cost2Color(m_cost);
         m_searchType = SearchType.None;
+
+        m_trueClearance = 0;
+        m_valueText.gameObject.SetActive(false);
     }
 
     public override void SetCost(byte cost)
@@ -260,6 +267,25 @@ public class SearchNode : BaseNode
     {
         m_rhs = value;
         m_rhsSource = source;
+    }
+    #endregion
+
+    #region HAA*
+    //到障碍或地图边缘的一种衡量方式
+    //如果有多种地形（如陆地、湖水等），则改为使用HashSet<TerrainType, int>
+    [SerializeField] private int m_trueClearance; 
+
+    public int TrueClearance
+    {
+        get { return m_trueClearance; }
+    }
+
+    public void SetTrueClearance(int value)
+    {
+        m_trueClearance = value;
+
+        m_valueText.gameObject.SetActive(true);
+        m_valueText.text = value.ToString();
     }
     #endregion
 }

@@ -11,6 +11,7 @@ public class SearchGrid : BaseGrid<SearchNode>
 
     public SearchAlgo m_searchAlgo;
     public HeuristicType m_heuristicType;
+    public int m_unitSize = 1;
     public float m_weight = 1;
     public float m_showTime = 0.1f;
 
@@ -202,6 +203,9 @@ public class SearchGrid : BaseGrid<SearchNode>
             case SearchAlgo.LPA_Star:
                 algo = new LPAStar(m_startNode, m_endNode, m_nodes, m_showTime);
                 //algo = new LPAStar_Optimized(m_startNode, m_endNode, m_nodes, m_showTime);
+                break;
+            case SearchAlgo.AnnotatedAstar:
+                algo = new AnnotatedAStar(m_startNode, m_endNode, m_nodes, m_weight, m_showTime, m_unitSize);
                 break;
             default:
                 Debug.LogError($"No code for SearchAlgo={m_searchAlgo}");

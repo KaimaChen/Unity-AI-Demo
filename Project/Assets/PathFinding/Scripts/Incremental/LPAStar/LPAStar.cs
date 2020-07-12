@@ -7,15 +7,14 @@ using UnityEngine;
 
 public class LPAStar : BaseSearchAlgo
 {
-    protected const int c_large = 999999; //这里自己定义了一个较大的值，而不使用int.maxValue是为了避免后面的运算超出范围
+    //这里自己定义了一个较大的值，而不使用int.maxValue是为了避免后面的运算超出范围
+    //不过也要注意f值的计算需要低于该值，否则就定一个更大的
+    protected const int c_large = 999999; 
 
-    protected readonly SimplePriorityQueue<Vector2Int, LPAKey> m_openQueue;
+    protected readonly SimplePriorityQueue<Vector2Int, LPAKey> m_openQueue = new SimplePriorityQueue<Vector2Int, LPAKey>();
 
     public LPAStar(SearchNode start, SearchNode end, SearchNode[,] nodes, float showTime)
-        : base(start, end, nodes, showTime)
-    {
-        m_openQueue = new SimplePriorityQueue<Vector2Int, LPAKey>();
-    }
+        : base(start, end, nodes, showTime) { }
 
     public override IEnumerator Process()
     {

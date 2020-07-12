@@ -80,4 +80,5 @@ public enum SearchAlgo
 	BiAstar,
 	IDA_Star,
 	LPA_Star,
+	AnnotatedAstar,
 }
