@@ -30,13 +30,23 @@ public class SearchNode : BaseNode
     public bool Opened
     {
         get { return m_opened; }
-        set { m_opened = value; }
+        set
+        {
+            m_opened = value;
+            if (m_opened)
+                m_closed = false;
+        }
     }
 
     public bool Closed
     {
         get { return m_closed; }
-        set { m_closed = value; }
+        set
+        {
+            m_closed = value;
+            if (m_closed)
+                m_opened = false;
+        }
     }
 
     public float G 
@@ -290,6 +300,14 @@ public class SearchNode : BaseNode
     #endregion
 
     #region D*
+    private float m_dstarKey;
+
+    public float DstarKey
+    {
+        get { return m_dstarKey; }
+        set { m_dstarKey = value; }
+    }
+
     public bool IsNew
     {
         get { return !m_opened && !m_closed; }

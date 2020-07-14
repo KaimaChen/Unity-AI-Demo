@@ -18,12 +18,12 @@ public class DStarLite : LPAStar
 
     private SearchNode m_lastNode;
     private SearchNode m_curtStart;
-    private readonly int[,] m_foundCosts;
+    private readonly int[,] m_foundMap; //目前通过传感器发现的地图
 
     public DStarLite(SearchNode start, SearchNode goal, SearchNode[,] nodes, float showTime)
         : base(start, goal, nodes, showTime)
     {
-        m_foundCosts = new int[nodes.GetLength(0), nodes.GetLength(1)];
+        m_foundMap = new int[nodes.GetLength(0), nodes.GetLength(1)];
     }
 
     public override IEnumerator Process()
@@ -60,11 +60,12 @@ public class DStarLite : LPAStar
 
     protected override void Initialize()
     {
+        //假设一开始通过卫星等方式获取了原始地图
         //这里我通过记录原本的格子代价来判断之后有没有发生过变化
         //如果是通过其他方式检测格子变化，则可以去掉这部分代码从而节省内存
         for (int y = 0; y < m_mapHeight; y++)
             for (int x = 0; x < m_mapWidth; x++)
-                m_foundCosts[y, x] = m_nodes[y, x].Cost;
+                m_foundMap[y, x] = m_nodes[y, x].Cost;
 
         m_curtStart = m_start;
         m_km = 0;
@@ -156,9 +157,9 @@ public class DStarLite : LPAStar
         for(int i = 0; i < neighbors.Count; i++)
         {
             Vector2Int pos = neighbors[i].Pos;
-            if (neighbors[i].Cost != m_foundCosts[pos.y, pos.x])
+            if (neighbors[i].Cost != m_foundMap[pos.y, pos.x])
             {
-                m_foundCosts[pos.y, pos.x] = neighbors[i].Cost;
+                m_foundMap[pos.y, pos.x] = neighbors[i].Cost;
                 nearChanged.Add(neighbors[i]);
             }
         }
@@ -177,7 +178,7 @@ public class DStarLite : LPAStar
         int x = curtPos.x + dx;
         int y = curtPos.y + dy;
         SearchNode node = GetNode(x, y);
-        if (node != null && m_foundCosts[y, x] != Define.c_costObstacle) //假设并不知道整张地图的情况，那么只能依赖当前发现的格子代价来作为判断依据
+        if (node != null && m_foundMap[y, x] != Define.c_costObstacle) //假设并不知道整张地图的情况，那么只能依赖当前发现的格子代价来作为判断依据
         {
             result.Add(node);
             return true;
