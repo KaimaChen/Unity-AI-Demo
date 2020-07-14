@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Priority_Queue;
 
+//BUG: 移除阻挡时并没有找一条更短的路径
+
 /// <summary>
 /// D* 算法
 /// 
@@ -27,49 +29,6 @@ public class DStar : BaseSearchAlgo
     {
         m_largeValue = m_mapWidth * m_mapHeight * 10;
         m_foundMap = new int[nodes.GetLength(0), nodes.GetLength(1)];
-    }
-
-    public override IEnumerator Process()
-    {
-        //假设一开始通过卫星等方式获取了原始地图
-        //这里我通过记录原本的格子代价来判断之后有没有发生过变化
-        //如果是通过其他方式检测格子变化，则可以去掉这部分代码从而节省内存
-        for (int y = 0; y < m_mapHeight; y++)
-            for (int x = 0; x < m_mapWidth; x++)
-                m_foundMap[y, x] = m_nodes[y, x].Cost;
-
-        //寻路开始
-        Insert(m_goal, 0);
-        ComputeShortestPath();
-
-        m_curt = m_start;
-        while(m_curt != m_goal)
-        {
-            if(m_curt.Parent == null || m_curt.Parent.IsObstacle())
-            {
-                Debug.LogError("寻找不到路径，遇见了障碍");
-                yield break;
-            }
-
-            //往前走一步
-            m_curt.SetSearchType(SearchType.Path, true);
-            m_curt = m_curt.Parent;
-            m_curt.SetSearchType(SearchType.CurtPos, true);
-
-            //通过传感器看看检查周围的环境是否变化
-            CheckNearChanged();
-
-            yield return new WaitForSeconds(m_showTime);
-        }
-
-        yield break;
-    }
-
-    private void ComputeShortestPath()
-    {
-        float result = 0;
-        while (result >= 0)
-            result = ProcessState();
     }
 
     private float ProcessState()
@@ -190,18 +149,89 @@ public class DStar : BaseSearchAlgo
         return GetKMin();
     }
 
+    public override IEnumerator Process()
+    {
+        //假设一开始通过卫星等方式获取了原始地图
+        //这里我通过记录原本的格子代价来判断之后有没有发生过变化
+        //如果是通过其他方式检测格子变化，则可以去掉这部分代码从而节省内存
+        for (int y = 0; y < m_mapHeight; y++)
+            for (int x = 0; x < m_mapWidth; x++)
+                m_foundMap[y, x] = m_nodes[y, x].Cost;
+
+        //寻路开始
+        Insert(m_goal, 0);
+        ComputeShortestPath();
+
+        m_curt = m_start;
+        while (m_curt != m_goal)
+        {
+            //往前走一步
+            if(MoveForwardOneStep() == false)
+            {
+                Debug.LogError("寻找不到路径，遇见了障碍");
+                yield break;
+            }
+
+            //通过传感器看看检查周围的环境是否变化
+            CheckNearChanged();
+
+            yield return new WaitForSeconds(m_showTime);
+        }
+
+        yield break;
+    }
+
+    private bool MoveForwardOneStep()
+    {
+        if (m_curt.Parent == null)
+            return false;
+
+        //路上遇见阻挡，则表示没有路径
+        if (Cost(m_curt, m_curt.Parent) >= m_largeValue)
+            return false;
+
+        m_curt.SetSearchType(SearchType.Path, true);
+        m_curt = m_curt.Parent;
+        m_curt.SetSearchType(SearchType.CurtPos, true);
+
+        return true;
+    }
+
+    private void ComputeShortestPath()
+    {
+        float result = 0;
+        while (result >= 0)
+            result = ProcessState();
+    }
+
+    private bool IsFoundObstacle(int x, int y)
+    {
+        //假设并不知道整张地图的情况，那么只能依赖当前发现的格子代价来作为判断依据
+        return m_foundMap[y, x] == Define.c_costObstacle;
+    }
+
     /// <summary>
     /// 从节点b到节点a的代价（对于有向图来说，顺序很重要）
     /// </summary>
     private float Cost(SearchNode a, SearchNode b)
     {
-        //假设并不知道整张地图的情况，那么只能依赖当前发现的格子代价来作为判断依据
-        bool isObstacle(int x, int y) { return m_foundMap[y, x] == Define.c_costObstacle; }
-
-        if(isObstacle(a.X, a.Y) || isObstacle(b.X, b.Y))
+        if(IsFoundObstacle(a.X, a.Y) || IsFoundObstacle(b.X, b.Y))
+        {
             return m_largeValue;
+        }
         else
+        {
+            //走斜线时，如果两边都是阻挡，那么该斜线的代价也是阻挡那么大
+            int dx = a.X - b.X;
+            int dy = a.Y - b.Y;
+            if(Mathf.Abs(dx) != 0 && Mathf.Abs(dy) != 0)
+            {
+                if (IsFoundObstacle(b.X + dx, b.Y) && IsFoundObstacle(b.X, b.Y + dy))
+                    return m_largeValue;
+            }
+
             return CalcCost(a, b);
+        }
     }
 
     private void CheckNearChanged()
