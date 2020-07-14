@@ -288,4 +288,11 @@ public class SearchNode : BaseNode
         m_valueText.text = value.ToString();
     }
     #endregion
+
+    #region D*
+    public bool IsNew
+    {
+        get { return !m_opened && !m_closed; }
+    }
+    #endregion
 }

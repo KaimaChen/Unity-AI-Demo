@@ -96,6 +96,8 @@ public class SearchGrid : BaseGrid<SearchNode>
 
     protected override void Generate()
     {
+        StopAllCoroutines();
+
         Reset();
 
         if (m_algo == null)
@@ -199,6 +201,9 @@ public class SearchGrid : BaseGrid<SearchNode>
                 break;
             case SearchAlgo.BiAstar:
                 algo = new BiAStar(m_startNode, m_goalNode, m_nodes, m_weight, m_showTime);
+                break;
+            case SearchAlgo.Dstar:
+                algo = new DStar(m_startNode, m_goalNode, m_nodes, m_showTime);
                 break;
             case SearchAlgo.LPA_Star:
                 algo = new LPAStar(m_startNode, m_goalNode, m_nodes, m_showTime);

@@ -82,6 +82,7 @@ public enum SearchAlgo
 	JPSPlus,
 	BiAstar,
 	//Incremental
+	Dstar,
 	IDA_Star,
 	LPA_Star,
 	DstarLite,

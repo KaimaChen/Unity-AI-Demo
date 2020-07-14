@@ -5,6 +5,8 @@ using UnityEngine;
 
 public abstract class BaseSearchAlgo
 {
+    private const float c_minDelta = 0.0001f; //误差小于该值则认为两个Float相等
+
     protected readonly SearchNode m_start;
     protected readonly SearchNode m_goal;
     protected readonly SearchNode[,] m_nodes;
@@ -99,4 +101,32 @@ public abstract class BaseSearchAlgo
             for(int x = 0; x < m_mapWidth; x++)
                 callback(m_nodes[y, x]);
     }
+
+    //TODO 想想更好的处理方式，不用float
+    #region Handle float
+    protected bool Equal(float a, float b)
+    {
+        return Mathf.Abs(a - b) <= c_minDelta;
+    }
+
+    protected bool NotEqual(float a, float b)
+    {
+        return !Equal(a, b);
+    }
+
+    protected bool Bigger(float a, float b)
+    {
+        return (a - b) > c_minDelta;
+    }
+
+    protected bool Less(float a, float b)
+    {
+        return Bigger(b, a);
+    }
+
+    protected bool LessEqual(float a, float b)
+    {
+        return Equal(a, b) || Less(a, b);
+    }
+    #endregion
 }
