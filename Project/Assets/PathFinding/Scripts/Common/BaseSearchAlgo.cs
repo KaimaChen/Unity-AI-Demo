@@ -33,20 +33,27 @@ public abstract class BaseSearchAlgo
         List<SearchNode> result = new List<SearchNode>();
         Vector2Int pos = node.Pos;
 
-        bool left = TryAddNeighbor(pos, -1, 0, result);
-        bool right = TryAddNeighbor(pos, 1, 0, result);
-        bool top = TryAddNeighbor(pos, 0, 1, result);
-        bool bottom = TryAddNeighbor(pos, 0, -1, result);
+        bool left = TryAddNode(pos, -1, 0, result);
+        bool right = TryAddNode(pos, 1, 0, result);
+        bool top = TryAddNode(pos, 0, 1, result);
+        bool bottom = TryAddNode(pos, 0, -1, result);
 
-        if (left || top) TryAddNeighbor(pos, -1, 1, result);
-        if (left || bottom) TryAddNeighbor(pos, -1, -1, result);
-        if (right || bottom) TryAddNeighbor(pos, 1, -1, result);
-        if (right || top) TryAddNeighbor(pos, 1, 1, result);
+        if (left || top) TryAddNode(pos, -1, 1, result);
+        if (left || bottom) TryAddNode(pos, -1, -1, result);
+        if (right || bottom) TryAddNode(pos, 1, -1, result);
+        if (right || top) TryAddNode(pos, 1, 1, result);
 
         return result;
     }
 
-    protected virtual bool TryAddNeighbor(Vector2Int curtPos, int dx, int dy, List<SearchNode> result)
+    protected void ForeachNeighbors(SearchNode node, Action<SearchNode> func)
+    {
+        List<SearchNode> neighbors = GetNeighbors(node);
+        for (int i = 0; i < neighbors.Count; i++)
+            func(neighbors[i]);
+    }
+
+    protected virtual bool TryAddNode(Vector2Int curtPos, int dx, int dy, List<SearchNode> result)
     {
         int x = curtPos.x + dx;
         int y = curtPos.y + dy;

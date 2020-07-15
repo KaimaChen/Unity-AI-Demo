@@ -173,7 +173,7 @@ public class DStarLite : LPAStar
         }
     }
 
-    protected override bool TryAddNeighbor(Vector2Int curtPos, int dx, int dy, List<SearchNode> result)
+    protected override bool TryAddNode(Vector2Int curtPos, int dx, int dy, List<SearchNode> result)
     {
         int x = curtPos.x + dx;
         int y = curtPos.y + dy;

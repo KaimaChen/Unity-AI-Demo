@@ -124,35 +124,35 @@ public class JumpPointSearch : AStar
 
             if(dx != 0 && dy != 0) //对角方向
             {
-                bool right = TryAddNeighbor(pos, dx, 0, result);
-                bool top = TryAddNeighbor(pos, 0, dy, result);
+                bool right = TryAddNode(pos, dx, 0, result);
+                bool top = TryAddNode(pos, 0, dy, result);
 
                 if(right || top)
-                    TryAddNeighbor(pos, dx, dy, result);
+                    TryAddNode(pos, dx, dy, result);
 
                 if (!IsWalkableAt(pos.x - dx, pos.y) && top)
-                    TryAddNeighbor(pos, -dx, dy, result);
+                    TryAddNode(pos, -dx, dy, result);
                 if (!IsWalkableAt(pos.x, pos.y - dy) && right)
-                    TryAddNeighbor(pos, dx, -dy, result);
+                    TryAddNode(pos, dx, -dy, result);
             }
             else if(dx != 0) //水平方向
             {
-                if (TryAddNeighbor(pos, dx, 0, result))
+                if (TryAddNode(pos, dx, 0, result))
                 {
                     if (!IsWalkableAt(pos.x, pos.y + 1))
-                        TryAddNeighbor(pos, dx, 1, result);
+                        TryAddNode(pos, dx, 1, result);
                     if (!IsWalkableAt(pos.x, pos.y - 1))
-                        TryAddNeighbor(pos, dx, -1, result);
+                        TryAddNode(pos, dx, -1, result);
                 }
             }
             else if(dy != 0) //竖直方向
             {
-                if(TryAddNeighbor(pos, 0, dy, result))
+                if(TryAddNode(pos, 0, dy, result))
                 {
                     if (!IsWalkableAt(pos.x + 1, pos.y))
-                        TryAddNeighbor(pos, 1, dy, result);
+                        TryAddNode(pos, 1, dy, result);
                     if (!IsWalkableAt(pos.x - 1, pos.y))
-                        TryAddNeighbor(pos, -1, dy, result);
+                        TryAddNode(pos, -1, dy, result);
                 }
             }
 

@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using Priority_Queue;
 
-//BUG: 移除阻挡时并没有找一条更短的路径
-
 /// <summary>
 /// D* 算法
 /// 
@@ -159,10 +157,10 @@ public class DStar : BaseSearchAlgo
                 m_foundMap[y, x] = m_nodes[y, x].Cost;
 
         //寻路开始
-        Insert(m_goal, 0);
-        ComputeShortestPath();
-
         m_curt = m_start;
+        Insert(m_goal, 0);
+        InitPlanPath();
+
         while (m_curt != m_goal)
         {
             //往前走一步
@@ -197,7 +195,16 @@ public class DStar : BaseSearchAlgo
         return true;
     }
 
-    private void ComputeShortestPath()
+    private void InitPlanPath()
+    {
+        float result = 0;
+        while (result >= 0 && !m_curt.Closed)
+        {
+            result = ProcessState();
+        }
+    }
+
+    private void ReplanPath()
     {
         float result = 0;
         while (result >= 0)
@@ -239,27 +246,50 @@ public class DStar : BaseSearchAlgo
         List<SearchNode> nearChanged = new List<SearchNode>();
 
         //假设检测器只能检查附近的点
-        List<SearchNode> neighbors = GetNeighbors(m_curt);
-        for (int i = 0; i < neighbors.Count; i++)
+        List<SearchNode> nearNodes = SensorDetectNodes(2);
+        for (int i = 0; i < nearNodes.Count; i++)
         {
-            Vector2Int pos = neighbors[i].Pos;
-            if (neighbors[i].Cost != m_foundMap[pos.y, pos.x])
+            Vector2Int pos = nearNodes[i].Pos;
+            if (nearNodes[i].Cost != m_foundMap[pos.y, pos.x])
             {
-                m_foundMap[pos.y, pos.x] = neighbors[i].Cost;
-                nearChanged.Add(neighbors[i]);
+                m_foundMap[pos.y, pos.x] = nearNodes[i].Cost;
+                nearChanged.Add(nearNodes[i]);
             }
         }
 
+        //如果发现有格子发生变化
         if(nearChanged.Count > 0)
         {
-            for (int i = 0; i < nearChanged.Count; i++)
-                ModifyCost(nearChanged[i], nearChanged[i].Cost);
+            for(int i = 0; i < nearChanged.Count; i++)
+            {
+                SearchNode node = nearChanged[i];
+                ModifyCost(node, node.Cost);
+                //原始论文中只把变化边的起端放到开放列表中，而终端不处理，如果是把障碍移除(非Closed)，那么并不会有新的点放到开放列表中，所以这里把邻居也一并放进去
+                ForeachNeighbors(node, (n) => { ModifyCost(n, n.Cost); }); 
+            }
 
-            ComputeShortestPath();
+            //重新计划路径
+            ReplanPath();
         }
     }
 
-    protected override bool TryAddNeighbor(Vector2Int curtPos, int dx, int dy, List<SearchNode> result)
+    /// <summary>
+    /// 传感器能检测到的格子
+    /// </summary>
+    /// <param name="radius">检测的范围</param>
+    /// <returns>能检测到的格子</returns>
+    private List<SearchNode> SensorDetectNodes(int radius)
+    {
+        List<SearchNode> result = new List<SearchNode>();
+
+        for(int dx = -radius; dx <= radius; dx++)
+            for(int dy = -radius; dy <= radius; dy++)
+                TryAddNode(m_curt.Pos, dx, dy, result);
+
+        return result;
+    }
+
+    protected override bool TryAddNode(Vector2Int curtPos, int dx, int dy, List<SearchNode> result)
     {
         int x = curtPos.x + dx;
         int y = curtPos.y + dy;

@@ -15,6 +15,7 @@ Some AI demo
   * Theta*
     * Lazy Theta*
 * Incremental Search
+  * D*
   * LPA*
   * D* Lite
 * Other Search
