@@ -205,6 +205,9 @@ public class SearchGrid : BaseGrid<SearchNode>
             case SearchAlgo.Dstar:
                 algo = new DStar(m_startNode, m_goalNode, m_nodes, m_showTime);
                 break;
+            case SearchAlgo.FocussedDstar:
+                algo = new FocussedDStar(m_startNode, m_goalNode, m_nodes, m_showTime);
+                break;
             case SearchAlgo.LPA_Star:
                 algo = new LPAStar(m_startNode, m_goalNode, m_nodes, m_showTime);
                 //algo = new LPAStar_Optimized(m_startNode, m_endNode, m_nodes, m_showTime);

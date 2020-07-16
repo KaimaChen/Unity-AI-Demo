@@ -303,17 +303,41 @@ public class SearchNode : BaseNode
     #endregion
 
     #region D*
-    private float m_dstarKey;
+    private float m_key;
 
-    public float DstarKey
+    public float Key
     {
-        get { return m_dstarKey; }
-        set { m_dstarKey = value; }
+        get { return m_key; }
+        set { m_key = value; }
     }
 
     public bool IsNew
     {
         get { return !m_opened && !m_closed; }
+    }
+    #endregion
+
+    #region FD*
+    private float m_fb;
+    private float m_fx;
+    private SearchNode m_r; //插入或更新开放列表时机器人的位置
+
+    public float Fb
+    {
+        get { return m_fb; }
+        set { m_fb = value; }
+    }
+
+    public float Fx
+    {
+        get { return m_fx; }
+        set { m_fx = value; }
+    }
+
+    public SearchNode R
+    {
+        get { return m_r; }
+        set { m_r = value; }
     }
     #endregion
 }

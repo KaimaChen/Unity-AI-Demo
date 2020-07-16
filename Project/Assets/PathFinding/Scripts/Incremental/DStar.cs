@@ -17,11 +17,14 @@ using Priority_Queue;
 /// </summary>
 public class DStar : BaseSearchAlgo
 {
+    private const int c_sensorRadius = 2;
+
     private readonly int m_largeValue; //用于阻挡的代价，普通算出来的移动代价一定要比该值小
-    private SearchNode m_curt;
     private readonly int[,] m_foundMap; //目前通过传感器发现的地图
     private readonly SimplePriorityQueue<SearchNode> m_openQueue = new SimplePriorityQueue<SearchNode>();
-    
+
+    private SearchNode m_currR;
+
     public DStar(SearchNode start, SearchNode goal, SearchNode[,] nodes, float showTime)
         : base(start, goal, nodes, showTime)
     {
@@ -45,10 +48,10 @@ public class DStar : BaseSearchAlgo
             for(int i = 0; i < neighbors.Count; i++)
             {
                 SearchNode Y = neighbors[i];
-                if(LessEqual(Y.H, kOld) && Bigger(X.H, (Y.H + Cost(Y, X))))
+                if(LessEqual(Y.H, kOld) && Bigger(X.H, (Y.H + C(Y, X))))
                 {
                     X.Parent = Y;
-                    X.H = Y.H + Cost(Y, X);
+                    X.H = Y.H + C(Y, X);
                 }
             }
         }
@@ -60,11 +63,11 @@ public class DStar : BaseSearchAlgo
             {
                 SearchNode Y = neighbors[i];
                 if(Y.IsNew ||
-                    (Y.Parent == X && NotEqual(Y.H, (X.H+ Cost(X, Y)))) ||
-                    (Y.Parent != X && Bigger(Y.H, (X.H + Cost(X, Y)))))
+                    (Y.Parent == X && NotEqual(Y.H, (X.H+ C(X, Y)))) ||
+                    (Y.Parent != X && Bigger(Y.H, (X.H + C(X, Y)))))
                 {
                     Y.Parent = X;
-                    Insert(Y, X.H + Cost(X, Y));
+                    Insert(Y, X.H + C(X, Y));
                 }
             }
         }
@@ -74,20 +77,20 @@ public class DStar : BaseSearchAlgo
             for(int i = 0; i < neighbors.Count; i++)
             {
                 SearchNode Y = neighbors[i];
-                if(Y.IsNew || (Y.Parent == X && NotEqual(Y.H, (X.H + Cost(X, Y)))))
+                if(Y.IsNew || (Y.Parent == X && NotEqual(Y.H, (X.H + C(X, Y)))))
                 {
                     Y.Parent = X;
-                    Insert(Y, X.H + Cost(X, Y));
+                    Insert(Y, X.H + C(X, Y));
                 }
                 else
                 {
-                    if(Y.Parent != X && Bigger(Y.H, (X.H + Cost(X, Y))))
+                    if(Y.Parent != X && Bigger(Y.H, (X.H + C(X, Y))))
                     {
                         Insert(X, X.H);
                     }
                     else
                     {
-                        if (Y.Parent != X && Bigger(X.H, (Y.H + Cost(Y, X))) && Y.Closed && Bigger(Y.H, kOld))
+                        if (Y.Parent != X && Bigger(X.H, (Y.H + C(Y, X))) && Y.Closed && Bigger(Y.H, kOld))
                             Insert(Y, Y.H);
                     }
                 }
@@ -122,19 +125,19 @@ public class DStar : BaseSearchAlgo
     private void Insert(SearchNode node, float newG)
     {
         if (node.IsNew)
-            node.DstarKey = newG;
+            node.Key = newG;
         else if (node.Opened)
-            node.DstarKey = Mathf.Min(node.DstarKey, newG);
+            node.Key = Mathf.Min(node.Key, newG);
         else if (node.Closed)
-            node.DstarKey = Mathf.Min(node.H, newG);
+            node.Key = Mathf.Min(node.H, newG);
 
         node.Opened = true;
         node.H = newG;
 
         if (m_openQueue.Contains(node))
-            m_openQueue.UpdatePriority(node, node.DstarKey);
+            m_openQueue.UpdatePriority(node, node.Key);
         else
-            m_openQueue.Enqueue(node, node.DstarKey);
+            m_openQueue.Enqueue(node, node.Key);
     }
 
     private float ModifyCost(SearchNode node, byte cost)
@@ -157,11 +160,11 @@ public class DStar : BaseSearchAlgo
                 m_foundMap[y, x] = m_nodes[y, x].Cost;
 
         //寻路开始
-        m_curt = m_start;
+        m_currR = m_start;
         Insert(m_goal, 0);
         InitPlanPath();
 
-        while (m_curt != m_goal)
+        while (m_currR != m_goal)
         {
             //往前走一步
             if(MoveForwardOneStep() == false)
@@ -181,16 +184,16 @@ public class DStar : BaseSearchAlgo
 
     private bool MoveForwardOneStep()
     {
-        if (m_curt.Parent == null)
+        if (m_currR.Parent == null)
             return false;
 
         //路上遇见阻挡，则表示没有路径
-        if (Cost(m_curt, m_curt.Parent) >= m_largeValue)
+        if (C(m_currR, m_currR.Parent) >= m_largeValue)
             return false;
 
-        m_curt.SetSearchType(SearchType.Path, true);
-        m_curt = m_curt.Parent;
-        m_curt.SetSearchType(SearchType.CurtPos, true);
+        m_currR.SetSearchType(SearchType.Path, true);
+        m_currR = m_currR.Parent;
+        m_currR.SetSearchType(SearchType.CurtPos, true);
 
         return true;
     }
@@ -198,7 +201,7 @@ public class DStar : BaseSearchAlgo
     private void InitPlanPath()
     {
         float result = 0;
-        while (result >= 0 && !m_curt.Closed)
+        while (result >= 0 && !m_currR.Closed)
         {
             result = ProcessState();
         }
@@ -220,7 +223,7 @@ public class DStar : BaseSearchAlgo
     /// <summary>
     /// 从节点b到节点a的代价（对于有向图来说，顺序很重要）
     /// </summary>
-    private float Cost(SearchNode a, SearchNode b)
+    private float C(SearchNode a, SearchNode b)
     {
         if(IsFoundObstacle(a.X, a.Y) || IsFoundObstacle(b.X, b.Y))
         {
@@ -246,7 +249,7 @@ public class DStar : BaseSearchAlgo
         List<SearchNode> nearChanged = new List<SearchNode>();
 
         //假设检测器只能检查附近的点
-        List<SearchNode> nearNodes = SensorDetectNodes(2);
+        List<SearchNode> nearNodes = SensorDetectNodes(c_sensorRadius);
         for (int i = 0; i < nearNodes.Count; i++)
         {
             Vector2Int pos = nearNodes[i].Pos;
@@ -283,7 +286,7 @@ public class DStar : BaseSearchAlgo
 
         for(int dx = -radius; dx <= radius; dx++)
             for(int dy = -radius; dy <= radius; dy++)
-                TryAddNode(m_curt.Pos, dx, dy, result);
+                TryAddNode(m_currR.Pos, dx, dy, result);
 
         return result;
     }

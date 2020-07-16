@@ -83,6 +83,7 @@ public enum SearchAlgo
 	BiAstar,
 	//Incremental
 	Dstar,
+	FocussedDstar,
 	IDA_Star,
 	LPA_Star,
 	DstarLite,
