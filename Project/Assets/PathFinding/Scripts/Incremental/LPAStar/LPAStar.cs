@@ -51,7 +51,7 @@ public class LPAStar : BaseSearchAlgo
     protected virtual LPAKey CalculateKey(SearchNode node)
     {
         float key2 = Mathf.Min(node.G, node.Rhs); //类似A*的g
-        float key1 = key2 + node.H; //类似A*的f
+        float key1 = key2 + node.ValidH(); //类似A*的f
         return new LPAKey(key1, key2);
     }
 

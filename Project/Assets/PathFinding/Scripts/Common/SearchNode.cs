@@ -57,13 +57,8 @@ public class SearchNode : BaseNode
 
     public float H
     {
-        get
-        {
-            if (m_h < 0)
-                m_h = SearchGrid.Instance.CalcHeuristic(Pos, SearchGrid.Instance.EndNode.Pos, 1);
-
-            return m_h;
-        }
+        get { return m_h; }
+        set { m_h = value; }
     }
     #endregion
 
@@ -134,9 +129,17 @@ public class SearchNode : BaseNode
         m_g = g;
     }
 
+    public float ValidH()
+    {
+        if (m_h < 0)
+            m_h = SearchGrid.Instance.CalcHeuristic(Pos, SearchGrid.Instance.EndNode.Pos, 1);
+
+        return m_h;
+    }
+
     public float F(float weight)
     {
-        return m_g + H;
+        return m_g + ValidH();
     }
 
     #region JPSPlus

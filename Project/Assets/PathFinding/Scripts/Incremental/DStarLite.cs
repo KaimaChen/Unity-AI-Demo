@@ -76,7 +76,7 @@ public class DStarLite : LPAStar
     protected override LPAKey CalculateKey(SearchNode node)
     {
         float key2 = Mathf.Min(node.G, node.Rhs);
-        float key1 = key2 + node.H + m_km; //这里相对LPA*多加了m_km值
+        float key1 = key2 + node.ValidH() + m_km; //这里相对LPA*多加了m_km值
         return new LPAKey(key1, key2);
     }
 

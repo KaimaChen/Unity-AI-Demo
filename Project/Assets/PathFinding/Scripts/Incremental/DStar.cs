@@ -7,7 +7,7 @@ using Priority_Queue;
 /// D* 算法
 /// 
 /// 一些调整：
-/// * 论文里使用的h容易误解为启发函数，所以下面我还是使用更为合理的g（表示到目标点的最短距离）
+/// * 论文里使用的h容易误解为启发函数，但实际表示到目标点的最短距离
 /// * 我这里用parent表示论文里的backpointer
 /// 
 /// 注意事项：
@@ -39,32 +39,32 @@ public class DStar : BaseSearchAlgo
         Delete(X);
 
         //发现RAISE，则检查能否通过邻居获得更短的路径
-        if(Less(kOld, X.G))
+        if(Less(kOld, X.H))
         {
             List<SearchNode> neighbors = GetNeighbors(X);
             for(int i = 0; i < neighbors.Count; i++)
             {
                 SearchNode Y = neighbors[i];
-                if(LessEqual(Y.G, kOld) && Bigger(X.G, (Y.G + Cost(Y, X))))
+                if(LessEqual(Y.H, kOld) && Bigger(X.H, (Y.H + Cost(Y, X))))
                 {
                     X.Parent = Y;
-                    X.G = Y.G + Cost(Y, X);
+                    X.H = Y.H + Cost(Y, X);
                 }
             }
         }
 
-        if(Equal(kOld, X.G)) //LOWER state
+        if(Equal(kOld, X.H)) //LOWER state
         {
             List<SearchNode> neighbors = GetNeighbors(X);
             for(int i = 0; i < neighbors.Count; i++)
             {
                 SearchNode Y = neighbors[i];
                 if(Y.IsNew ||
-                    (Y.Parent == X && NotEqual(Y.G, (X.G+ Cost(X, Y)))) ||
-                    (Y.Parent != X && Bigger(Y.G, (X.G + Cost(X, Y)))))
+                    (Y.Parent == X && NotEqual(Y.H, (X.H+ Cost(X, Y)))) ||
+                    (Y.Parent != X && Bigger(Y.H, (X.H + Cost(X, Y)))))
                 {
                     Y.Parent = X;
-                    Insert(Y, X.G + Cost(X, Y));
+                    Insert(Y, X.H + Cost(X, Y));
                 }
             }
         }
@@ -74,21 +74,21 @@ public class DStar : BaseSearchAlgo
             for(int i = 0; i < neighbors.Count; i++)
             {
                 SearchNode Y = neighbors[i];
-                if(Y.IsNew || (Y.Parent == X && NotEqual(Y.G, (X.G + Cost(X, Y)))))
+                if(Y.IsNew || (Y.Parent == X && NotEqual(Y.H, (X.H + Cost(X, Y)))))
                 {
                     Y.Parent = X;
-                    Insert(Y, X.G + Cost(X, Y));
+                    Insert(Y, X.H + Cost(X, Y));
                 }
                 else
                 {
-                    if(Y.Parent != X && Bigger(Y.G, (X.G + Cost(X, Y))))
+                    if(Y.Parent != X && Bigger(Y.H, (X.H + Cost(X, Y))))
                     {
-                        Insert(X, X.G);
+                        Insert(X, X.H);
                     }
                     else
                     {
-                        if (Y.Parent != X && Bigger(X.G, (Y.G + Cost(Y, X))) && Y.Closed && Bigger(Y.G, kOld))
-                            Insert(Y, Y.G);
+                        if (Y.Parent != X && Bigger(X.H, (Y.H + Cost(Y, X))) && Y.Closed && Bigger(Y.H, kOld))
+                            Insert(Y, Y.H);
                     }
                 }
             }
@@ -126,10 +126,10 @@ public class DStar : BaseSearchAlgo
         else if (node.Opened)
             node.DstarKey = Mathf.Min(node.DstarKey, newG);
         else if (node.Closed)
-            node.DstarKey = Mathf.Min(node.G, newG);
+            node.DstarKey = Mathf.Min(node.H, newG);
 
         node.Opened = true;
-        node.G = newG;
+        node.H = newG;
 
         if (m_openQueue.Contains(node))
             m_openQueue.UpdatePriority(node, node.DstarKey);
@@ -142,7 +142,7 @@ public class DStar : BaseSearchAlgo
         node.SetCost(cost);
 
         if (node.Closed)
-            Insert(node, node.G);
+            Insert(node, node.H);
 
         return GetKMin();
     }
@@ -264,7 +264,6 @@ public class DStar : BaseSearchAlgo
             {
                 SearchNode node = nearChanged[i];
                 ModifyCost(node, node.Cost);
-                //原始论文中只把变化边的起端放到开放列表中，而终端不处理，如果是把障碍移除(非Closed)，那么并不会有新的点放到开放列表中，所以这里把邻居也一并放进去
                 ForeachNeighbors(node, (n) => { ModifyCost(n, n.Cost); }); 
             }
 
