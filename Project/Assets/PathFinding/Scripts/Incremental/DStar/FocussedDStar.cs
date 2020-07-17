@@ -4,31 +4,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FocussedDStar : BaseSearchAlgo
+public class FocussedDStar : BaseDStar
 {
-    private const int c_sensorRadius = 2;
     private const float c_epsilon = 0.01f;
 
-    private readonly int m_largeValue; //用于阻挡的代价，普通算出来的移动代价一定要比该值小
-    private readonly int[,] m_foundMap; //目前通过传感器发现的地图
     private readonly SimplePriorityQueue<SearchNode, FDKey> m_openQueue = new SimplePriorityQueue<SearchNode, FDKey>();
 
     private SearchNode m_currR;
     private float m_currD;
 
     public FocussedDStar(SearchNode start, SearchNode goal, SearchNode[,] nodes, float showTime)
-        : base(start, goal, nodes, showTime)
-    {
-        m_largeValue = m_mapWidth * m_mapHeight * 10;
-        m_foundMap = new int[nodes.GetLength(0), nodes.GetLength(1)];
-    }
+        : base(start, goal, nodes, showTime) { }
 
     public override IEnumerator Process()
     {
-        if (MoveRobot() == false)
-            Debug.LogError("找不到路径");
-
-        yield break;
+        yield return MoveRobot();
     }
 
     private float GVal(SearchNode X, SearchNode Y)
@@ -129,36 +119,6 @@ public class FocussedDStar : BaseSearchAlgo
             return new Vector2(X.Fx, X.Key);
     }
 
-    private bool IsFoundObstacle(int x, int y)
-    {
-        //假设并不知道整张地图的情况，那么只能依赖当前发现的格子代价来作为判断依据
-        return m_foundMap[y, x] == Define.c_costObstacle;
-    }
-
-    /// <summary>
-    /// 从节点b到节点a的代价（对于有向图来说，顺序很重要）
-    /// </summary>
-    private float C(SearchNode a, SearchNode b)
-    {
-        if (IsFoundObstacle(a.X, a.Y) || IsFoundObstacle(b.X, b.Y))
-        {
-            return m_largeValue;
-        }
-        else
-        {
-            //走斜线时，如果两边都是阻挡，那么该斜线的代价也是阻挡那么大
-            int dx = a.X - b.X;
-            int dy = a.Y - b.Y;
-            if (Mathf.Abs(dx) != 0 && Mathf.Abs(dy) != 0)
-            {
-                if (IsFoundObstacle(b.X + dx, b.Y) && IsFoundObstacle(b.X, b.Y + dy))
-                    return m_largeValue;
-            }
-
-            return CalcCost(a, b);
-        }
-    }
-
     private Vector2? ProcessState()
     {
         SearchNode X = MinState();
@@ -222,13 +182,14 @@ public class FocussedDStar : BaseSearchAlgo
         return MinVal();
     }
 
-    private bool MoveRobot()
+    private IEnumerator MoveRobot()
     {
-        ForeachNode((X) =>
-        {
-            X.Reset();
-        });
+        //记录原始的地图信息
+        for (int y = 0; y < m_mapHeight; y++)
+            for (int x = 0; x < m_mapWidth; x++)
+                m_foundMap[y, x] = m_nodes[y, x].Cost;
 
+        //初始化
         m_currD = 0;
         m_currR = m_start;
         Insert(m_goal, 0);
@@ -237,9 +198,14 @@ public class FocussedDStar : BaseSearchAlgo
         //第一次寻路
         while (!m_start.Closed && val != null)
             val = ProcessState();
-        if (m_start.IsNew)
-            return false;
 
+        if (m_start.IsNew)
+        {
+            Debug.LogError("找不到路径");
+            yield break;
+        }
+
+        //移动并检查环境变化
         SearchNode R = m_start;
         while(R != m_goal)
         {
@@ -270,34 +236,22 @@ public class FocussedDStar : BaseSearchAlgo
                 {
                     SearchNode X = nearChanged[i];
                     val = ModifyCost(X, X.Cost);
+                    ForeachNeighbors(X, (n) => { ModifyCost(n, n.Cost); }); //原论文中没有这句，如果移除了阻挡，并不能正常处理
                 }
 
+                //重新规划路径
                 while (val != null && Less(val.Value, Cost(R)))
                     val = ProcessState();
             }
 
-            R.SetSearchType(SearchType.Path, true);
-            R = R.Parent; //往后走一步
-            R.SetSearchType(SearchType.CurtPos, true);
+            //前进一步
+            if (MoveForwardOneStep(ref R) == false)
+                yield break;
+
+            yield return new WaitForSeconds(m_showTime);
         }
 
-        return true;
-    }
-
-    /// <summary>
-    /// 传感器能检测到的格子
-    /// </summary>
-    /// <param name="radius">检测的范围</param>
-    /// <returns>能检测到的格子</returns>
-    private List<SearchNode> SensorDetectNodes(SearchNode R, int radius)
-    {
-        List<SearchNode> result = new List<SearchNode>();
-
-        for (int dx = -radius; dx <= radius; dx++)
-            for (int dy = -radius; dy <= radius; dy++)
-                TryAddNode(R.Pos, dx, dy, result);
-
-        return result;
+        yield break;
     }
 }
 
