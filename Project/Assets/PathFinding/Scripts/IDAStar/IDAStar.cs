@@ -79,7 +79,7 @@ public class IDAStar : BaseSearchAlgo
 
             path.Push(neighbor);
 
-            float value = Search(path, g + CalcCost(node, neighbor), threshold);
+            float value = Search(path, g + c(node, neighbor), threshold);
             if (value == c_found)
                 return c_found;
 

@@ -66,7 +66,7 @@ public class LPAStar_Optimized : LPAStar
         for (int i = 0; i < neighbors.Count; i++)
         {
             InitNode(neighbors[i]);
-            float value = curtNode.G + CalcCost(curtNode, neighbors[i]);
+            float value = curtNode.G + c(curtNode, neighbors[i]);
             //优化点：简化rhs的计算
             //* 因为curtNode的g值变小，因此邻居中rhs值变化也肯定和curtNode有关，而不用遍历自己的邻居
             if (neighbors[i] != m_start && neighbors[i].Rhs > value)

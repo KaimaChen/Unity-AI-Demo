@@ -73,7 +73,7 @@ public class LPAStar : BaseSearchAlgo
         for(int i = 0; i < neighbors.Count; i++)
         {
             SearchNode neighbor = neighbors[i];
-            float value = neighbor.G + CalcCost(neighbor, curtNode);
+            float value = neighbor.G + c(neighbor, curtNode);
             if(value < minRhs)
             {
                 minRhs = value;
@@ -184,7 +184,7 @@ public class LPAStar : BaseSearchAlgo
             List<SearchNode> neighbors = GetNeighbors(lastNode);
             for(int i = 0; i < neighbors.Count; i++)
             {
-                float g = neighbors[i].G + CalcCost(lastNode, neighbors[i]); //min(g + c)作为上一个路径点
+                float g = neighbors[i].G + c(lastNode, neighbors[i]); //min(g + c)作为上一个路径点
                 if(g < min)
                 {
                     min = g;

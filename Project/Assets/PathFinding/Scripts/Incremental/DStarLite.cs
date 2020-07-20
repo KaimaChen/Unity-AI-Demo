@@ -122,7 +122,7 @@ public class DStarLite : LPAStar
         List<SearchNode> neighbors = GetNeighbors(EndNode());
         for(int i = 0; i < neighbors.Count; i++)
         {
-            float g = neighbors[i].G + CalcCost(EndNode(), neighbors[i]);
+            float g = neighbors[i].G + c(EndNode(), neighbors[i]);
             if(g < min)
             {
                 min = g;
@@ -166,7 +166,7 @@ public class DStarLite : LPAStar
 
         if(nearChanged.Count > 0)
         {
-            m_km += CalcCost(m_lastNode, m_curtStart);
+            m_km += c(m_lastNode, m_curtStart);
             m_lastNode = m_curtStart;
 
             HandleChangedNode(nearChanged);

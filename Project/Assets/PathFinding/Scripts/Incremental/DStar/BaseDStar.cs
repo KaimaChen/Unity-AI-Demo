@@ -44,7 +44,7 @@ public abstract class BaseDStar : BaseSearchAlgo
                     return m_largeValue;
             }
 
-            return CalcCost(a, b);
+            return c(a, b);
         }
     }
 

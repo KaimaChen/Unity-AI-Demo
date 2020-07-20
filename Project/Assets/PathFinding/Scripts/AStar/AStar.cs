@@ -101,7 +101,7 @@ public class AStar : BaseSearchAlgo
     protected virtual void ComputeCost(SearchNode curtNode, SearchNode nextNode)
     {
         //Path 1
-        float cost = curtNode.G + CalcCost(curtNode, nextNode);
+        float cost = curtNode.G + c(curtNode, nextNode);
         if (cost < nextNode.G)
             nextNode.SetParent(curtNode, cost);
     }

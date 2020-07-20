@@ -93,7 +93,20 @@ public abstract class BaseSearchAlgo
         return GetNode(pos.x, pos.y);
     }
 
-    protected virtual float CalcCost(SearchNode a, SearchNode b)
+    protected float g(SearchNode s)
+    {
+        return s.G;
+    }
+
+    protected virtual float h(SearchNode s)
+    {
+        if (s.H < 0)
+            s.H = CalcHeuristic(s, m_goal);
+
+        return s.H;
+    }
+
+    protected virtual float c(SearchNode a, SearchNode b)
     {
         Vector2Int ap = a.Pos;
         Vector2Int bp = b.Pos;

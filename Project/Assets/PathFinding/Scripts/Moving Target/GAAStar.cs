@@ -3,6 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Generalized Adaptive A*
+/// 
+/// 例子使用方式：移动起点或终点，增加移除障碍后等一会看结果
+/// </summary>
 public class GAAStar : BaseSearchAlgo
 {
     private int m_counter;
@@ -22,6 +27,7 @@ public class GAAStar : BaseSearchAlgo
         m_decreaseNodes.Clear();
 
         m_counter = 1;
+        m_pathCost.Clear();
         m_deltaH.Clear();
         m_deltaH[1] = 0;
 
@@ -38,8 +44,10 @@ public class GAAStar : BaseSearchAlgo
             InitializeState(m_currGoal);
             
             m_currStart.G = 0;
+            m_currStart.Parent = null;
             ClearOpen();
-            AddToOpen(m_currStart, m_currStart.F());
+
+            AddToOpen(m_currStart, g(m_currStart) + h(m_currStart));
 
             ComputePath();
             if (m_open.Count <= 0)
@@ -50,15 +58,16 @@ public class GAAStar : BaseSearchAlgo
             yield return ShowPath();
 
             //修改起点
-            m_currStart = m_start;
+            if (m_currStart != m_start)
+                m_currStart = m_start;
 
             //修改终点
             if(m_currGoal != m_goal)
             {
                 InitializeState(m_goal);
-                if (m_goal.G + m_goal.H < m_pathCost[m_counter])
-                    m_goal.H = m_pathCost[m_counter] - m_goal.G;
-                m_deltaH[m_counter + 1] = m_deltaH[m_counter] + m_goal.H;
+                if (g(m_goal) + h(m_goal) < m_pathCost[m_counter])
+                    m_goal.H = m_pathCost[m_counter] - g(m_goal);
+                m_deltaH[m_counter + 1] = m_deltaH[m_counter] + h(m_goal);
                 m_currGoal = m_goal;
             }
             else
@@ -77,10 +86,10 @@ public class GAAStar : BaseSearchAlgo
     {
         if(s.Iteration != m_counter && s.Iteration != 0)
         {
-            if (s.G + s.H < m_pathCost[s.Iteration])
-                s.H = m_pathCost[s.Iteration] - s.G;
-            s.H -= (m_deltaH[m_counter] - m_deltaH[s.Iteration]);
-            s.H = Mathf.Max(s.H, CalcHeuristic(s, m_currGoal));
+            if (g(s) + h(s) < m_pathCost[s.Iteration])
+                s.H = m_pathCost[s.Iteration] - g(s);
+            s.H = h(s) - (m_deltaH[m_counter] - m_deltaH[s.Iteration]);
+            s.H = Mathf.Max(h(s), CalcHeuristic(s, m_currGoal));
             s.G = float.MaxValue;
         }
         else if(s.Iteration == 0)
@@ -97,19 +106,19 @@ public class GAAStar : BaseSearchAlgo
     /// </summary>
     private void ComputePath()
     {
-        while(m_open.Count > 0 && m_currGoal.G > m_open.FirstPriority)
+        while(g(m_currGoal) > MinKey())
         {
             SearchNode s = PopFromOpen();
             ForeachNeighbors(s, (a) =>
             {
                 InitializeState(a);
-                if(a.G > s.G + CalcCost(s, a))
+                if(g(a) > g(s) + c(s, a))
                 {
-                    a.G = s.G + CalcCost(s, a);
+                    a.G = g(s) + c(s, a);
                     a.Parent = s;
 
                     if (a.Opened) RemoveFromOpen(a);
-                    AddToOpen(a, a.F());
+                    AddToOpen(a, g(a) + h(a));
                 }
             });
         }
@@ -127,11 +136,11 @@ public class GAAStar : BaseSearchAlgo
             {
                 InitializeState(s);
                 InitializeState(a);
-                if(s.H > CalcCost(s, a) + a.H)
+                if(h(s) > c(s, a) + h(a))
                 {
-                    s.H = CalcCost(s, a) + a.H;
+                    s.H = c(s, a) + h(a);
                     if (s.Opened) RemoveFromOpen(s);
-                    AddToOpen(s, s.H);
+                    AddToOpen(s, h(s));
                 }
             });
         }
@@ -143,11 +152,11 @@ public class GAAStar : BaseSearchAlgo
             ForeachNeighbors(n, (s) =>
             {
                 InitializeState(s);
-                if(s.H > CalcCost(s, n) + n.H)
+                if(h(s) > c(s, n) + h(n))
                 {
-                    s.H = CalcCost(s, n) + n.H;
+                    s.H = c(s, n) + h(n);
                     if (s.Opened) RemoveFromOpen(s);
-                    AddToOpen(s, s.H);
+                    AddToOpen(s, h(s));
                 }
             });
         }
@@ -157,18 +166,33 @@ public class GAAStar : BaseSearchAlgo
     {
         ForeachNode((n) =>
         {
-            if (n.SearchType == SearchType.Path)
+            if (!n.IsObstacle() && n.SearchType == SearchType.Path)
                 n.SetSearchType(SearchType.None, true);
         });
 
-        SearchNode lastNode = m_currGoal;
-        while (lastNode != null)
+        if(Mathf.Approximately(m_pathCost[m_counter], float.MaxValue) == false)
         {
-            lastNode.SetSearchType(SearchType.Path, true);
-            lastNode = lastNode.Parent;
+            SearchNode lastNode = m_currGoal;
+            while (lastNode != null && lastNode != m_start)
+            {
+                lastNode.SetSearchType(SearchType.Path, true);
+                lastNode = lastNode.Parent;
+            }
+        }
+        else
+        {
+            Debug.LogError("找不到路径");
         }
 
-        yield return new WaitForSeconds(m_showTime);
+        yield return new WaitForSeconds(1);
+    }
+
+    protected override float h(SearchNode s)
+    {
+        if (s.H < 0)
+            s.H = CalcHeuristic(s, m_currGoal);
+
+        return s.H;
     }
 
     #region 监听事件
@@ -199,22 +223,30 @@ public class GAAStar : BaseSearchAlgo
     {
         m_open.Enqueue(node, priority);
         node.Opened = true;
-        node.SetSearchType(SearchType.Open, true);
+        node.SetSearchType(SearchType.Open, true, true);
     }
 
     private void RemoveFromOpen(SearchNode node)
     {
         m_open.Remove(node);
         node.Opened = false;
-        node.SetSearchType(SearchType.Expanded, true);
+        node.SetSearchType(SearchType.Expanded, true, true);
     }
 
     private SearchNode PopFromOpen()
     {
         SearchNode node = m_open.Dequeue();
         node.Opened = false;
-        node.SetSearchType(SearchType.Expanded, true);
+        node.SetSearchType(SearchType.Expanded, true, true);
         return node;
+    }
+
+    private float MinKey()
+    {
+        if (m_open.Count > 0)
+            return m_open.FirstPriority;
+        else
+            return float.MaxValue;
     }
 
     private void ClearOpen()
@@ -224,6 +256,8 @@ public class GAAStar : BaseSearchAlgo
         ForeachNode((n) =>
         {
             n.Opened = false;
+            if (!n.IsObstacle() && n.SearchType == SearchType.Open)
+                n.SetSearchType(SearchType.None, true, true);
         });
     }
     #endregion
