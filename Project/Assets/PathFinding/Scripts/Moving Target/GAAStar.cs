@@ -45,7 +45,7 @@ public class GAAStar : BaseSearchAlgo
             
             m_currStart.G = 0;
             m_currStart.Parent = null;
-            ClearOpen();
+            ClearOpen(true);
 
             AddToOpen(m_currStart, g(m_currStart) + h(m_currStart));
 
@@ -126,7 +126,7 @@ public class GAAStar : BaseSearchAlgo
 
     private void ConsistencyProcedure()
     {
-        ClearOpen();
+        ClearOpen(false);
 
         foreach(SearchNode s in m_decreaseNodes)
         {
@@ -249,14 +249,18 @@ public class GAAStar : BaseSearchAlgo
             return float.MaxValue;
     }
 
-    private void ClearOpen()
+    private void ClearOpen(bool clearShow)
     {
         m_open.Clear();
 
         ForeachNode((n) =>
         {
             n.Opened = false;
+
             if (!n.IsObstacle() && n.SearchType == SearchType.Open)
+                n.SetSearchType(SearchType.None, true, true);
+
+            if (clearShow && !n.IsObstacle() && n.SearchType == SearchType.Expanded)
                 n.SetSearchType(SearchType.None, true, true);
         });
     }
