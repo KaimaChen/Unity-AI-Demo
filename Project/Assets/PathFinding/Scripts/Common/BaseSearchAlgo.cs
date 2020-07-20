@@ -7,8 +7,8 @@ public abstract class BaseSearchAlgo
 {
     private const float c_minDelta = 0.0001f; //误差小于该值则认为两个Float相等
 
-    protected readonly SearchNode m_start;
-    protected readonly SearchNode m_goal;
+    protected SearchNode m_start;
+    protected SearchNode m_goal;
     protected readonly SearchNode[,] m_nodes;
     protected readonly int m_mapWidth;
     protected readonly int m_mapHeight;
@@ -100,7 +100,16 @@ public abstract class BaseSearchAlgo
         return SearchGrid.Instance.CalcHeuristic(ap, bp, b.Cost); //TODO 对于FlowField，需要把直线上的所有格子代价都加进来
     }
 
-    public virtual void NotifyChangeNode(List<SearchNode> nodes) { }
+    protected float CalcHeuristic(SearchNode a, SearchNode b, float weight = 1)
+    {
+        return SearchGrid.Instance.CalcHeuristic(a.Pos, b.Pos, weight);
+    }
+
+    public virtual void NotifyChangeNode(List<SearchNode> nodes, bool increaseCost) { }
+
+    public virtual void NotifyChangeStart(SearchNode startNode) { }
+
+    public virtual void NotifyChangeGoal(SearchNode goalNode) { }
 
     protected void ForeachNode(Action<SearchNode> callback)
     {

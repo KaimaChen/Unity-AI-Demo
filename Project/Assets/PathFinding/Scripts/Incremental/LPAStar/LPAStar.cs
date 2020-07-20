@@ -138,7 +138,7 @@ public class LPAStar : BaseSearchAlgo
         GeneratePath();
     }
 
-    public override void NotifyChangeNode(List<SearchNode> nodes)
+    public override void NotifyChangeNode(List<SearchNode> nodes, bool increaseCost)
     {
         #region show
         //重置格子的颜色，以便观察哪些格子被新扩展了

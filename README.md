@@ -18,6 +18,8 @@ Some AI demo
   * D*
   * LPA*
   * D* Lite
+* Moving Target
+  * GAA*
 * Other Search
   * Flow Field
   * Jump Point Search

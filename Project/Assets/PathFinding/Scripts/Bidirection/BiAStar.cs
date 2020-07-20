@@ -1,11 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Priority_Queue;
 
 public class BiAStar : AStar
 {
-    private readonly List<Vector2Int> m_startOpenList = new List<Vector2Int>();
-    private readonly List<Vector2Int> m_endOpenList = new List<Vector2Int>();
+    private readonly SimplePriorityQueue<Vector2Int> m_startOpen = new SimplePriorityQueue<Vector2Int>();
+    private readonly SimplePriorityQueue<Vector2Int> m_endOpen = new SimplePriorityQueue<Vector2Int>();
 
     public BiAStar(SearchNode start, SearchNode goal, SearchNode[,] nodes, float weight, float showTime)
         : base(start, goal, nodes, weight, showTime)
@@ -23,7 +24,7 @@ public class BiAStar : AStar
 
         SearchNode startStopNode = null, endStopNode = null;
 
-        while(m_startOpenList.Count > 0 && m_endOpenList.Count > 0)
+        while(m_startOpen.Count > 0 && m_endOpen.Count > 0)
         {
             //处理start方向
             ProcessStart(ref startStopNode, ref endStopNode);
@@ -111,12 +112,12 @@ public class BiAStar : AStar
     {
         if(isStart)
         {
-            m_startOpenList.Add(node.Pos);
+            m_startOpen.Enqueue(node.Pos, node.F(m_weight));
             node.SetStartOpen();
         }
         else
         {
-            m_endOpenList.Add(node.Pos);
+            m_endOpen.Enqueue(node.Pos, node.F(m_weight));
             node.SetEndOpen();
         }
 
@@ -126,9 +127,9 @@ public class BiAStar : AStar
     private Vector2Int PopOpenList(bool isStart)
     {
         if (isStart)
-            return PopOpenListImpl(m_startOpenList);
+            return m_startOpen.Dequeue();
         else
-            return PopOpenListImpl(m_endOpenList);
+            return m_endOpen.Dequeue();
     }
 
     private void UpdateVertex(SearchNode curtNode, SearchNode nextNode, bool isStart)

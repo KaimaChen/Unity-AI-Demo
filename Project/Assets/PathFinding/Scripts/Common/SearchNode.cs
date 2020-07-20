@@ -113,7 +113,7 @@ public class SearchNode : BaseNode
 
     public void SetSearchType(SearchType type, bool excludeStartEnd, bool excludeSpecial = false)
     {
-        if (excludeStartEnd && (m_searchType == SearchType.Start || m_searchType == SearchType.End))
+        if (excludeStartEnd && (m_searchType == SearchType.Start || m_searchType == SearchType.Goal))
             return;
 
         if (excludeSpecial && (IsObstacle() || m_searchType == SearchType.Path || m_searchType == SearchType.CurtPos))
@@ -129,17 +129,17 @@ public class SearchNode : BaseNode
         m_g = g;
     }
 
-    public float ValidH()
+    public float ValidH(float weight = 1)
     {
         if (m_h < 0)
-            m_h = SearchGrid.Instance.CalcHeuristic(Pos, SearchGrid.Instance.EndNode.Pos, 1);
+            m_h = SearchGrid.Instance.CalcHeuristic(Pos, SearchGrid.Instance.EndNode.Pos, weight);
 
         return m_h;
     }
 
-    public float F(float weight)
+    public float F(float weight = 1)
     {
-        return m_g + ValidH();
+        return m_g + ValidH(weight);
     }
 
     #region JPSPlus

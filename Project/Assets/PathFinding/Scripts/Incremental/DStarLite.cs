@@ -194,7 +194,7 @@ public class DStarLite : LPAStar
         //假设每次只能走一步，因此不能像以前那样直接生成整条路径
     }
 
-    public override void NotifyChangeNode(List<SearchNode> nodes)
+    public override void NotifyChangeNode(List<SearchNode> nodes, bool increaseCost)
     {
         //不使用通知方式，而是通过检查附近的点是否发生变化来模拟检测器的工作方式
     }

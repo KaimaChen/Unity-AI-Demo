@@ -29,7 +29,7 @@ public static class Define
 		{
 			case SearchType.Start:
 				return new Color(0.5f, 0, 0, 1);
-			case SearchType.End:
+			case SearchType.Goal:
 				return new Color(1, 0, 0, 1);
 			case SearchType.Open:
 				return new Color(0, 0.5f, 0.5f, 1);
@@ -63,7 +63,7 @@ public enum SearchType
 {
 	None,
 	Start,
-	End,
+	Goal,
 	Open,
 	Expanded,
 	Path,
@@ -72,21 +72,23 @@ public enum SearchType
 
 public enum SearchAlgo
 {
-	Astar,
+	A_Star,
 	BestFirstSearch,
 	BreadthFirstSearch,
 	DijkstraSearch,
-	ThetaStar,
-	LazyThetaStar,
+	Theta_Star,
+	LazyTheta_Star,
 	JPS,
 	JPSPlus,
-	BiAstar,
+	BiA_Star,
 	//Incremental
-	Dstar,
-	FocussedDstar,
+	D_Star,
+	FocussedD_Star,
 	IDA_Star,
 	LPA_Star,
 	DstarLite,
+	//Moving Target
+	GAA_Star,
 	//Hierarchy
-	AnnotatedAstar,
+	AnnotatedA_Star,
 }

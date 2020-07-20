@@ -1,16 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-//TODO 使用小顶堆
+using Priority_Queue;
 
 /// <summary>
 /// A*寻路
 /// </summary>
 public class AStar : BaseSearchAlgo
 {
-    private readonly float m_weight = 1;
-    protected readonly List<Vector2Int> m_openList = new List<Vector2Int>();
+    protected readonly float m_weight = 1;
+    private readonly SimplePriorityQueue<Vector2Int> m_open = new SimplePriorityQueue<Vector2Int>();
 
     public AStar(SearchNode start, SearchNode goal, SearchNode[,] nodes, float weight, float showTime)
         : base(start, goal, nodes, showTime)
@@ -114,7 +113,7 @@ public class AStar : BaseSearchAlgo
 
     protected virtual void AddToOpenList(SearchNode node)
     {
-        m_openList.Add(node.Pos);
+        m_open.Enqueue(node.Pos, node.F(m_weight));
         node.Opened = true;
         node.SetSearchType(SearchType.Open, true);
     }
@@ -124,31 +123,11 @@ public class AStar : BaseSearchAlgo
     /// </summary>
     protected virtual Vector2Int PopOpenList()
     {
-        return PopOpenListImpl(m_openList);
-    }
-
-    protected Vector2Int PopOpenListImpl(List<Vector2Int> list)
-    {
-        float min = GetNode(list[0]).F(m_weight);
-        int minIndex = 0;
-        for (int i = 1; i < list.Count; i++)
-        {
-            float score = GetNode(list[i]).F(m_weight);
-            if (score < min)
-            {
-                min = score;
-                minIndex = i;
-            }
-        }
-
-        Vector2Int result = list[minIndex];
-        list.RemoveAt(minIndex);
-
-        return result;
+        return m_open.Dequeue();
     }
 
     protected virtual int OpenListSize()
     {
-        return m_openList.Count;
+        return m_open.Count;
     }
 }

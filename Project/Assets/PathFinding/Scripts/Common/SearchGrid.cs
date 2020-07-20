@@ -19,7 +19,7 @@ public class SearchGrid : BaseGrid<SearchNode>
     private SearchNode m_goalNode;
 
     private bool m_dragStartNode;
-    private bool m_dragEndNode;
+    private bool m_dragGoalNode;
 
     private BaseSearchAlgo m_algo;
 
@@ -40,7 +40,7 @@ public class SearchGrid : BaseGrid<SearchNode>
         m_startNode = GetNode(0, m_row / 2);
         m_startNode.SetSearchType(SearchType.Start, false);
         m_goalNode = GetNode(m_col - 1, m_row / 2);
-        m_goalNode.SetSearchType(SearchType.End, false);
+        m_goalNode.SetSearchType(SearchType.Goal, false);
     }
 
     protected override void Update()
@@ -51,38 +51,20 @@ public class SearchGrid : BaseGrid<SearchNode>
             if (node == m_startNode)
                 m_dragStartNode = true;
             else if (node == m_goalNode)
-                m_dragEndNode = true;
+                m_dragGoalNode = true;
         }
         else if(Input.GetMouseButtonUp(0))
         {
-            m_dragStartNode = m_dragEndNode = false;
+            m_dragStartNode = m_dragGoalNode = false;
         }
         else if(Input.GetMouseButton(0))
         {
-            if(m_dragStartNode)
-            {
-                SearchNode node = DragNode();
-                if (node != null)
-                {
-                    m_startNode.SetSearchType(SearchType.None, false);
-                    m_startNode = node;
-                    m_startNode.SetSearchType(SearchType.Start, false);
-                }
-            }
-            else if(m_dragEndNode)
-            {
-                SearchNode node = DragNode();
-                if (node != null)
-                {
-                    m_goalNode.SetSearchType(SearchType.None, false);
-                    m_goalNode = node;
-                    m_goalNode.SetSearchType(SearchType.End, false);
-                }
-            }
+            if (m_dragStartNode)
+                DragStartNode();
+            else if (m_dragGoalNode)
+                DragGoalNode();
             else
-            {
                 AddObstacle();
-            }
         }
         else if(Input.GetMouseButton(1))
         {
@@ -116,7 +98,7 @@ public class SearchGrid : BaseGrid<SearchNode>
                 node.SetCost(Define.c_costObstacle);
 
                 if (m_algo != null)
-                    m_algo.NotifyChangeNode(new List<SearchNode>() { node });
+                    m_algo.NotifyChangeNode(new List<SearchNode>() { node }, true);
 
                 return true;
             }
@@ -135,7 +117,7 @@ public class SearchGrid : BaseGrid<SearchNode>
                 node.SetCost(Define.c_costRoad);
 
                 if(m_algo != null)
-                    m_algo.NotifyChangeNode(new List<SearchNode>() { node });
+                    m_algo.NotifyChangeNode(new List<SearchNode>() { node }, false);
 
                 return true;
             }
@@ -153,6 +135,34 @@ public class SearchGrid : BaseGrid<SearchNode>
             return null;
     }
 
+    private void DragStartNode()
+    {
+        SearchNode node = DragNode();
+        if (node != null)
+        {
+            m_startNode.SetSearchType(SearchType.None, false);
+            m_startNode = node;
+            m_startNode.SetSearchType(SearchType.Start, false);
+
+            if (m_algo != null)
+                m_algo.NotifyChangeStart(m_startNode);
+        }
+    }
+
+    private void DragGoalNode()
+    {
+        SearchNode node = DragNode();
+        if (node != null)
+        {
+            m_goalNode.SetSearchType(SearchType.None, false);
+            m_goalNode = node;
+            m_goalNode.SetSearchType(SearchType.Goal, false);
+
+            if (m_algo != null)
+                m_algo.NotifyChangeGoal(m_goalNode);
+        }
+    }
+
     private void Reset()
     {
         for(int y = 0; y < m_row; y++)
@@ -164,7 +174,7 @@ public class SearchGrid : BaseGrid<SearchNode>
         }
 
         m_startNode.SetSearchType(SearchType.Start, false);
-        m_goalNode.SetSearchType(SearchType.End, false);
+        m_goalNode.SetSearchType(SearchType.Goal, false);
 
         m_algo = null;
     }
@@ -175,13 +185,13 @@ public class SearchGrid : BaseGrid<SearchNode>
 
         switch(m_searchAlgo)
         {
-            case SearchAlgo.Astar:
+            case SearchAlgo.A_Star:
                 algo = new AStar(m_startNode, m_goalNode, m_nodes, m_weight, m_showTime);
                 break;
-            case SearchAlgo.ThetaStar:
+            case SearchAlgo.Theta_Star:
                 algo = new ThetaStar(m_startNode, m_goalNode, m_nodes, m_weight, m_showTime);
                 break;
-            case SearchAlgo.LazyThetaStar:
+            case SearchAlgo.LazyTheta_Star:
                 algo = new LazyThetaStar(m_startNode, m_goalNode, m_nodes, m_weight, m_showTime);
                 break;
             case SearchAlgo.BestFirstSearch:
@@ -199,13 +209,13 @@ public class SearchGrid : BaseGrid<SearchNode>
             case SearchAlgo.JPSPlus:
                 algo = new JPSPlus(m_startNode, m_goalNode, m_nodes, m_weight, m_showTime);
                 break;
-            case SearchAlgo.BiAstar:
+            case SearchAlgo.BiA_Star:
                 algo = new BiAStar(m_startNode, m_goalNode, m_nodes, m_weight, m_showTime);
                 break;
-            case SearchAlgo.Dstar:
+            case SearchAlgo.D_Star:
                 algo = new DStar(m_startNode, m_goalNode, m_nodes, m_showTime);
                 break;
-            case SearchAlgo.FocussedDstar:
+            case SearchAlgo.FocussedD_Star:
                 algo = new FocussedDStar(m_startNode, m_goalNode, m_nodes, m_showTime);
                 break;
             case SearchAlgo.LPA_Star:
@@ -215,8 +225,11 @@ public class SearchGrid : BaseGrid<SearchNode>
             case SearchAlgo.DstarLite:
                 algo = new DStarLite(m_startNode, m_goalNode, m_nodes, m_showTime);
                 break;
-            case SearchAlgo.AnnotatedAstar:
+            case SearchAlgo.AnnotatedA_Star:
                 algo = new AnnotatedAStar(m_startNode, m_goalNode, m_nodes, m_weight, m_showTime, m_unitSize);
+                break;
+            case SearchAlgo.GAA_Star:
+                algo = new GAAStar(m_startNode, m_goalNode, m_nodes, m_showTime);
                 break;
             default:
                 Debug.LogError($"No code for SearchAlgo={m_searchAlgo}");
