@@ -5,6 +5,9 @@ using UnityEngine;
 
 /// <summary>
 /// Generalized Fringe-Retrieving A*
+/// 
+/// 例子使用方式：调高showTime，然后移动目标点，观察结果
+/// 注意：该算法没处理环境中新增/减少的阻挡
 /// </summary>
 public class GFRAStar : BaseSearchAlgo
 {
