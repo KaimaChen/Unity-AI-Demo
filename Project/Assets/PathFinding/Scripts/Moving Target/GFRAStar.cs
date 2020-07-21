@@ -52,7 +52,7 @@ public class GFRAStar : BaseSearchAlgo
                 yield break;
             }
 
-            bool openListInComplete = false;
+            bool openListIncomplete = false;
             while(TestClosedList(m_currGoal))
             {
                 //如果目标节点还在原本的最短路径上，那么直接利用上次的寻路结果
@@ -76,17 +76,17 @@ public class GFRAStar : BaseSearchAlgo
                 if(m_currStart != m_previousStart)
                 {
                     GeneralizedStep2();
-                    openListInComplete = true;
+                    openListIncomplete = true;
                 }
             }
 
             //如果复用了子树，那么还要补上相关节点来满足A*的属性1
-            if(openListInComplete)
+            if(openListIncomplete)
             {
                 m_iteration++;
                 GeneralizedStep4();
             }
-            //else 起点没变化，而终点离开了原本的最短路径，则重新进行寻路
+            //else 起点没变化，而终点离开了原本的最短路径，则重新进行寻路（原本的搜索树能全部复用，所以不用做任何处理）
         }
 
         yield break;
@@ -141,19 +141,20 @@ public class GFRAStar : BaseSearchAlgo
         return false;
     }
 
-    private void CheckRoot(SearchNode s, SearchNode root, SearchNode subRoot, out bool isRoot, out bool isSubRoot)
+    private bool CheckSubRoot(SearchNode s, SearchNode subRoot)
     {
-        isSubRoot = (s == subRoot);
+        if (s == subRoot)
+            return true;
 
         while (s.Parent != null)
         {
             s = s.Parent;
 
             if (s == subRoot)
-                isSubRoot = true;
+                return true;
         }
 
-        isRoot = (s == root);
+        return false;
     }
 
     /// <summary>
@@ -165,8 +166,7 @@ public class GFRAStar : BaseSearchAlgo
 
         ForeachNode((s) =>
         {
-            CheckRoot(s, m_previousStart, m_currStart, out bool isRoot, out bool isSubRoot);
-            if (isRoot && !isSubRoot)
+            if (!CheckSubRoot(s, m_currStart))
             {
                 m_deleted.Add(s);
                 s.Parent = null;
@@ -321,10 +321,7 @@ public class GFRAStar : BaseSearchAlgo
             }
         }
 
-        m_open.Remove(minNode);
-
-        minNode.Opened = false;
-        minNode.SetSearchType(SearchType.Expanded, true, true);
+        RemoveFromOpen(minNode);
         return minNode;
     }
     #endregion
