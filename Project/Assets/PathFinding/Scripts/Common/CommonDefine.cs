@@ -89,6 +89,7 @@ public enum SearchAlgo
 	DstarLite,
 	//Moving Target
 	GAA_Star,
+	GFRA_Star,
 	//Hierarchy
 	AnnotatedA_Star,
 }

@@ -212,6 +212,8 @@ public class SearchGrid : BaseGrid<SearchNode>
             case SearchAlgo.BiA_Star:
                 algo = new BiAStar(m_startNode, m_goalNode, m_nodes, m_weight, m_showTime);
                 break;
+
+            #region Incremental
             case SearchAlgo.D_Star:
                 algo = new DStar(m_startNode, m_goalNode, m_nodes, m_showTime);
                 break;
@@ -225,11 +227,19 @@ public class SearchGrid : BaseGrid<SearchNode>
             case SearchAlgo.DstarLite:
                 algo = new DStarLite(m_startNode, m_goalNode, m_nodes, m_showTime);
                 break;
-            case SearchAlgo.AnnotatedA_Star:
-                algo = new AnnotatedAStar(m_startNode, m_goalNode, m_nodes, m_weight, m_showTime, m_unitSize);
-                break;
+            #endregion
+
+            #region Moving Target
             case SearchAlgo.GAA_Star:
                 algo = new GAAStar(m_startNode, m_goalNode, m_nodes, m_showTime);
+                break;
+            case SearchAlgo.GFRA_Star:
+                algo = new GFRAStar(m_startNode, m_goalNode, m_nodes, m_showTime);
+                break;
+            #endregion
+
+            case SearchAlgo.AnnotatedA_Star:
+                algo = new AnnotatedAStar(m_startNode, m_goalNode, m_nodes, m_weight, m_showTime, m_unitSize);
                 break;
             default:
                 Debug.LogError($"No code for SearchAlgo={m_searchAlgo}");

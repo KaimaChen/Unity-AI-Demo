@@ -340,4 +340,14 @@ public class SearchNode : BaseNode
         set { m_r = value; }
     }
     #endregion
+
+    #region GFRA*
+    private bool m_expanded;
+
+    public bool Expanded
+    {
+        get { return m_expanded; }
+        set { m_expanded = value; }
+    }
+    #endregion
 }
